@@ -829,3 +829,18 @@
 [2026-06-15 19:04:25.783] [INFO ] src/chat_service.c:409 - Public msg from qhl: nihao
 [2026-06-15 19:05:25.739] [INFO ] src/reactor.c:256 - fd=15 error/hangup event
 [2026-06-15 19:05:25.739] [INFO ] src/client.c:81 - Client destroyed: fd=15, user=qhl, ip=127.0.0.1:50860
+[2026-06-15 19:14:54.440] [INFO ] src/reactor.c:256 - fd=16 error/hangup event
+[2026-06-15 19:14:54.441] [INFO ] src/client.c:81 - Client destroyed: fd=16, user=qqqq, ip=10.11.7.254:2212
+[2026-06-15 19:18:10.254] [INFO ] src/main.c:20 - Received signal 2, shutting down...
+[2026-06-15 19:18:10.254] [INFO ] src/reactor.c:364 - Main reactor stopped
+[2026-06-15 19:18:10.254] [INFO ] src/main.c:164 - Shutting down...
+[2026-06-15 19:18:10.254] [INFO ] src/reactor.c:279 - Sub-reactor[1] stopped
+[2026-06-15 19:18:10.254] [INFO ] src/reactor.c:279 - Sub-reactor[3] stopped
+[2026-06-15 19:18:10.254] [INFO ] src/reactor.c:279 - Sub-reactor[0] stopped
+[2026-06-15 19:18:10.254] [INFO ] src/reactor.c:279 - Sub-reactor[2] stopped
+[2026-06-15 19:18:10.529] [INFO ] src/heartbeat.c:64 - Heartbeat stopped
+[2026-06-15 19:18:10.529] [INFO ] src/reactor.c:552 - Stopping reactor...
+[2026-06-15 19:18:10.529] [INFO ] src/reactor.c:583 - Reactor stopped
+[2026-06-15 19:18:10.529] [INFO ] src/threadpool.c:111 - Threadpool destroyed
+[2026-06-15 19:18:10.529] [INFO ] src/client.c:28 - Client manager destroyed
+[2026-06-15 19:18:10.529] [INFO ] src/db.c:137 - MySQL connection closed

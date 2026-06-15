@@ -1,6 +1,7 @@
 #include "threadpool.h"
 #include "logger.h"
 
+/* 工作线程主循环: 从任务队列取任务并执行, 无任务时等待条件变量 */
 static void *threadpool_worker(void *arg)
 {
     threadpool_t *pool = (threadpool_t *)arg;
@@ -37,6 +38,7 @@ static void *threadpool_worker(void *arg)
     return NULL;
 }
 
+/* 创建线程池: 分配结构体, 创建互斥锁/条件变量, 启动工作线程 */
 threadpool_t *threadpool_create(int thread_count)
 {
     if (thread_count <= 0) thread_count = 1;
@@ -82,6 +84,7 @@ threadpool_t *threadpool_create(int thread_count)
     return pool;
 }
 
+/* 销毁线程池: 发关闭信号, 唤醒工作线程, 等待退出, 清理资源 */
 void threadpool_destroy(threadpool_t *pool)
 {
     if (!pool) return;
@@ -111,6 +114,7 @@ void threadpool_destroy(threadpool_t *pool)
     LOG_INFO("Threadpool destroyed");
 }
 
+/* 向线程池添加任务: 创建任务节点加入队尾, 唤醒一个工作线程 */
 int threadpool_add_task(threadpool_t *pool, task_func_t func, void *arg)
 {
     if (!pool) return -1;
@@ -144,6 +148,7 @@ int threadpool_add_task(threadpool_t *pool, task_func_t func, void *arg)
     return 0;
 }
 
+/* 获取当前待处理的任务数量 (线程安全) */
 int threadpool_task_count(threadpool_t *pool)
 {
     if (!pool) return 0;

@@ -8,6 +8,7 @@
 #define MAX_SUB_REACTORS 64
 static int g_sub_eventfds[MAX_SUB_REACTORS];
 
+/* 向指定子Reactor的eventfd写入通知, 唤醒它处理待发送数据 */
 void chat_notify_sub_reactor(int sub_reactor_idx)
 {
     if (sub_reactor_idx >= 0 && sub_reactor_idx < MAX_SUB_REACTORS &&
@@ -18,7 +19,7 @@ void chat_notify_sub_reactor(int sub_reactor_idx)
     }
 }
 
-/* 供 reactor 初始化 eventfd 数组 */
+/* 保存子Reactor的eventfd, 供后续跨线程通知使用 */
 void chat_set_eventfd(int idx, int efd)
 {
     if (idx >= 0 && idx < MAX_SUB_REACTORS) {
@@ -26,6 +27,7 @@ void chat_set_eventfd(int idx, int efd)
     }
 }
 
+/* 将消息写入客户端发送缓冲区, 并通知子Reactor发送 */
 int chat_send_message(int fd, uint8_t msg_type,
                       const uint8_t *body, uint16_t body_len)
 {
@@ -569,7 +571,7 @@ static void handle_heartbeat(chat_task_t *task)
                       (const uint8_t *)pong, strlen(pong));
 }
 
-/* 聊天服务处理入口 */
+/* 聊天服务主入口: 根据消息类型分发到各处理函数 */
 void chat_service_process(void *arg)
 {
     chat_task_t *task = (chat_task_t *)arg;

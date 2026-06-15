@@ -7,6 +7,7 @@ static struct {
     int timeout;
 } g_hb_ctx;
 
+/* 心跳检查回调: 判断客户端空闲时间是否超时, 超时则标记不活跃 */
 static int hb_check_callback(client_t *cli, void *arg)
 {
     (void)arg;
@@ -21,6 +22,7 @@ static int hb_check_callback(client_t *cli, void *arg)
     return 0;
 }
 
+/* 心跳线程主循环: 定时遍历所有客户端检查超时 */
 static void *heartbeat_thread(void *arg)
 {
     heartbeat_t *hb = (heartbeat_t *)arg;
@@ -37,6 +39,7 @@ static void *heartbeat_thread(void *arg)
     return NULL;
 }
 
+/* 启动心跳检测: 设置超时时间和检查间隔, 创建心跳线程 */
 int heartbeat_start(heartbeat_t *hb, int timeout, int interval)
 {
     if (!hb) return -1;
@@ -55,6 +58,7 @@ int heartbeat_start(heartbeat_t *hb, int timeout, int interval)
     return 0;
 }
 
+/* 停止心跳检测: 设置停止标志, 等待心跳线程退出 */
 void heartbeat_stop(heartbeat_t *hb)
 {
     if (!hb || !hb->running) return;

@@ -6,7 +6,7 @@
 
 /* ============ 子 Reactor 实现 ============ */
 
-/* 处理客户端可读事件 (ET 模式, 循环读直到 EAGAIN) */
+/* 处理客户端可读事件: ET模式下循环recv直到EAGAIN, 写入接收环形缓冲区 */
 static void sub_handle_read(client_t *cli)
 {
     uint8_t buf[4096];
@@ -38,7 +38,7 @@ static void sub_handle_read(client_t *cli)
     }
 }
 
-/* 处理客户端可写事件: 从 outbuf 取出数据发送 (ET 模式) */
+/* 处理客户端可写事件: 从outbuf取数据发送, 控制EPOLLOUT监听 */
 static void sub_handle_write(client_t *cli, int epoll_fd)
 {
     uint8_t buf[4096];
@@ -165,7 +165,7 @@ static void sub_try_assemble_packet(client_t *cli, threadpool_t *biz_pool)
     }
 }
 
-/* 尝试发送客户端缓冲区中待发送的数据 */
+/* 遍历本子Reactor的客户端, 发送缓冲区中待发送的数据 */
 static void sub_flush_pending_sends(sub_reactor_t *sub)
 {
     for (int fd = 0; fd < MAX_CLIENTS; fd++) {
@@ -185,7 +185,7 @@ static void sub_flush_pending_sends(sub_reactor_t *sub)
     }
 }
 
-/* 清理不活跃/已断开的客户端 (仅清理属于本子Reactor的客户端) */
+/* 清理已断开的客户端: 广播下线通知, 从epoll移除, 释放资源 */
 static void sub_cleanup_clients(int epoll_fd, int sub_idx)
 {
     for (int fd = 0; fd < MAX_CLIENTS; fd++) {
@@ -219,7 +219,7 @@ static void sub_cleanup_clients(int epoll_fd, int sub_idx)
     }
 }
 
-/* 子 Reactor 线程主循环 */
+/* 子Reactor线程主循环: epoll_wait监听事件, 分发读写, 定期清理 */
 static void *sub_reactor_thread(void *arg)
 {
     sub_reactor_t *sub = (sub_reactor_t *)arg;
@@ -282,7 +282,7 @@ static void *sub_reactor_thread(void *arg)
 
 /* ============ 主 Reactor 实现 ============ */
 
-/* 主 Reactor 线程 */
+/* 主Reactor线程: 监听新连接, 轮询分发给子Reactor */
 static void *main_reactor_thread(void *arg)
 {
     reactor_t *r = (reactor_t *)arg;
@@ -367,6 +367,7 @@ static void *main_reactor_thread(void *arg)
 
 /* ============ Reactor API ============ */
 
+/* 初始化Reactor: 创建监听socket, 主/子epoll, eventfd */
 int reactor_init(reactor_t *r, int port, int sub_count,
                  threadpool_t *biz_pool)
 {
@@ -504,6 +505,7 @@ int reactor_init(reactor_t *r, int port, int sub_count,
     return 0;
 }
 
+/* 将子Reactor的eventfd注册到chat_service, 供跨线程通知 */
 void reactor_setup_eventfds(reactor_t *r)
 {
     if (!r || !r->subs) return;
@@ -512,6 +514,7 @@ void reactor_setup_eventfds(reactor_t *r)
     }
 }
 
+/* 启动所有子Reactor线程, 并在当前线程运行主Reactor */
 int reactor_run(reactor_t *r)
 {
     if (!r) return -1;
@@ -544,6 +547,7 @@ int reactor_run(reactor_t *r)
     return 0;
 }
 
+/* 优雅停止Reactor: 关闭监听fd, 唤醒并等待所有子Reactor线程退出 */
 void reactor_stop(reactor_t *r)
 {
     if (!r || r->stopped) return;

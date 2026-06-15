@@ -33,6 +33,7 @@ static pthread_mutex_t g_send_mutex = PTHREAD_MUTEX_INITIALIZER;
  *  工具函数
  * ══════════════════════════════════════════ */
 
+/* 获取当前时间, 格式 "HH:MM:SS" */
 static void get_time_str(char *buf, size_t size)
 {
     struct timeval tv;
@@ -42,6 +43,7 @@ static void get_time_str(char *buf, size_t size)
     strftime(buf, size, "%H:%M:%S", &tm_info);
 }
 
+/* 获取终端窗口宽度 (列数), 用于居中/对齐 */
 static int get_term_width(void)
 {
     struct winsize w;
@@ -50,17 +52,20 @@ static int get_term_width(void)
     return 80;
 }
 
+/* 打印一条灰色分隔线 */
 static void print_separator(void)
 {
     printf(CLR_DIM "──────────────────────────────────────────────────" CLR_RESET "\n");
 }
 
+/* 打印带图标的系统提示消息 (如加入/离开) */
 static void print_system_msg(const char *icon, const char *color, const char *msg)
 {
     printf("\n" CLR_DIM "%s" CLR_RESET " %s%s %s" CLR_RESET "\n",
            "     ", color, icon, msg);
 }
 
+/* 打印输入提示符, 已登录青色, 未登录灰色 */
 static void print_prompt(void)
 {
     printf(g_logged_in ? CLR_CYAN "» " CLR_RESET : CLR_DIM "» " CLR_RESET);
@@ -69,6 +74,7 @@ static void print_prompt(void)
 
 /* ── JSON 字段提取 ── */
 
+/* 从 JSON 字符串中提取指定 key 的字符串值 */
 static int json_get_str(const char *json, const char *key,
                         char *out, size_t out_size)
 {
@@ -96,6 +102,7 @@ static int json_get_int(const char *json, const char *key)
 }
 
 /* ── 解析 "用户名 密码" 参数 ── */
+/* 从 "用户名 密码" 格式的参数中拆分出用户名和密码 */
 static int parse_user_pass(const char *rest, char *user, char *pass, size_t sz)
 {
     while (*rest == ' ') rest++;
@@ -165,6 +172,7 @@ static void draw_bubble(int align, const char *color,
 }
 
 /* 快捷: 构建底部标签并绘制气泡 */
+/* 绘制自己发出的公屏消息气泡 (右对齐, 青色) */
 static void show_self_public(const char *msg, const char *time_str)
 {
     char label[128];
@@ -173,6 +181,7 @@ static void show_self_public(const char *msg, const char *time_str)
     draw_bubble(1, CLR_CYAN, label, msg);
 }
 
+/* 绘制自己发出的私聊气泡 (右对齐, 黄色) */
 static void show_self_private(const char *to, const char *msg, const char *time_str)
 {
     char label[128];
@@ -180,6 +189,7 @@ static void show_self_private(const char *to, const char *msg, const char *time_
     draw_bubble(1, CLR_YELLOW, label, msg);
 }
 
+/* 绘制别人发的公屏消息气泡 (左对齐, 绿色) */
 static void show_other_public(const char *from, const char *msg,
                               const char *time_str, int is_admin)
 {
@@ -189,6 +199,7 @@ static void show_other_public(const char *from, const char *msg,
     draw_bubble(0, CLR_GREEN, label, msg);
 }
 
+/* 绘制别人发给我的私聊气泡 (左对齐, 黄色) */
 static void show_other_private(const char *from, const char *msg,
                                const char *time_str, int is_admin)
 {
@@ -202,6 +213,7 @@ static void show_other_private(const char *from, const char *msg,
  *  协议包收发
  * ══════════════════════════════════════════ */
 
+/* 组装并发送协议包 (包头+包体), 加锁保证线程安全 */
 static int send_packet(uint8_t type, const uint8_t *body, uint16_t body_len)
 {
     uint8_t packet[PROTO_HEADER_LEN + PROTO_MAX_BODY_LEN];
@@ -458,6 +470,7 @@ static void *heartbeat_thread(void *arg)
  *  启动画面
  * ══════════════════════════════════════════ */
 
+/* 显示居中欢迎画面: 标题 + 命令说明 */
 static void show_welcome(const char *ip, int port)
 {
     printf("\033[2J\033[H");

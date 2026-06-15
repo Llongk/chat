@@ -17,6 +17,7 @@
  *     4. 否则拒绝
  */
 
+/* 初始化令牌桶: 设置容量、速率, 初始满令牌允许首次突发 */
 void ratelimit_init(client_t *cli, double capacity, double rate)
 {
     if (!cli) return;
@@ -26,6 +27,7 @@ void ratelimit_init(client_t *cli, double capacity, double rate)
     gettimeofday(&cli->last_refill, NULL);
 }
 
+/* 令牌桶限流检查: 补充令牌后判断是否放行 (0=放行, -1=限流) */
 int ratelimit_check(client_t *cli, double capacity, double rate)
 {
     if (!cli) return -1;
@@ -58,6 +60,7 @@ int ratelimit_check(client_t *cli, double capacity, double rate)
     return -1;  /* 限流 */
 }
 
+/* 获取当前令牌数 (用于调试/监控) */
 double ratelimit_tokens(const client_t *cli)
 {
     if (!cli) return 0.0;

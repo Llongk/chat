@@ -4,6 +4,7 @@
 static FILE      *g_log_file   = NULL;
 static pthread_mutex_t g_log_mutex = PTHREAD_MUTEX_INITIALIZER;
 
+/* 将日志级别枚举转换为字符串 */
 static const char *level_str(log_level_t level)
 {
     switch (level) {
@@ -15,6 +16,7 @@ static const char *level_str(log_level_t level)
     }
 }
 
+/* 初始化日志系统: 打开日志文件 (追加模式), 支持NULL即仅输出到终端 */
 int logger_init(const char *filepath)
 {
     if (filepath) {
@@ -27,6 +29,7 @@ int logger_init(const char *filepath)
     return 0;
 }
 
+/* 关闭日志文件句柄 */
 void logger_close(void)
 {
     if (g_log_file) {
@@ -35,6 +38,7 @@ void logger_close(void)
     }
 }
 
+/* 写入日志: 格式化时间+级别+文件行号+消息, 同时写文件和终端 */
 void logger_write(log_level_t level, const char *file, int line,
                   const char *fmt, ...)
 {

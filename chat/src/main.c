@@ -13,7 +13,7 @@ static threadpool_t *g_biz_pool   = NULL;
 static heartbeat_t   g_heartbeat;
 static volatile int  g_running    = 1;  /* volatile: 信号和主线程共享 */
 
-/* 信号处理器 —— 只设标志, 不阻塞 */
+/* 信号处理器: 收到SIGINT/SIGTERM时设标志并唤醒Reactor */
 static void signal_handler(int sig)
 {
     if (sig == SIGINT || sig == SIGTERM) {
@@ -40,6 +40,7 @@ static void signal_handler(int sig)
     }
 }
 
+/* 注册信号处理器 (SIGINT/SIGTERM/SIGPIPE) */
 static void setup_signals(void)
 {
     struct sigaction sa;
@@ -52,6 +53,7 @@ static void setup_signals(void)
     signal(SIGPIPE, SIG_IGN);
 }
 
+/* 打印服务器启动横幅 */
 static void print_banner(void)
 {
     printf("\n");
@@ -62,6 +64,7 @@ static void print_banner(void)
     printf("\n");
 }
 
+/* 打印命令行参数使用说明 */
 static void print_usage(const char *prog)
 {
     printf("Usage: %s [options]\n", prog);
@@ -75,6 +78,7 @@ static void print_usage(const char *prog)
     printf("  -h             Show this help\n");
 }
 
+/* 服务器主入口: 解析参数, 初始化各模块, 启动Reactor, 优雅退出 */
 int main(int argc, char *argv[])
 {
     int port       = DEFAULT_PORT;

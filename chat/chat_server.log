@@ -1,0 +1,80 @@
+[2026-06-15 11:47:22.638] [INFO ] src/main.c:110 - ========================================
+[2026-06-15 11:47:22.638] [INFO ] src/main.c:111 - IM Chat Server starting...
+[2026-06-15 11:47:22.638] [INFO ] src/main.c:112 - Configuration: port=8888, sub_reactors=4, biz_threads=4
+[2026-06-15 11:47:22.638] [INFO ] src/main.c:114 - ========================================
+[2026-06-15 11:47:22.640] [INFO ] src/db.c:48 - MySQL connected: chat_app@localhost:3306
+[2026-06-15 11:47:22.642] [INFO ] src/db.c:74 - Database 'chat_db' selected
+[2026-06-15 11:47:22.643] [INFO ] src/db.c:95 - Users table ready
+[2026-06-15 11:47:22.643] [INFO ] src/db.c:128 - Database initialization complete
+[2026-06-15 11:47:22.643] [INFO ] src/client.c:14 - Client manager initialized
+[2026-06-15 11:47:22.643] [INFO ] src/threadpool.c:81 - Threadpool created with 4 threads
+[2026-06-15 11:47:22.643] [INFO ] src/reactor.c:416 - Listening on port 8888
+[2026-06-15 11:47:22.643] [INFO ] src/reactor.c:503 - Reactor initialized: 4 sub-reactors
+[2026-06-15 11:47:22.643] [INFO ] src/heartbeat.c:54 - Heartbeat started: timeout=3600s, interval=5s
+[2026-06-15 11:47:22.643] [INFO ] src/main.c:157 - Server is ready. Waiting for connections...
+[2026-06-15 11:47:22.643] [INFO ] src/main.c:158 - Press Ctrl+C to stop the server
+[2026-06-15 11:47:22.644] [INFO ] src/reactor.c:228 - Sub-reactor[0] started, epoll_fd=7
+[2026-06-15 11:47:22.644] [INFO ] src/reactor.c:291 - Main reactor started, listening on port (fd=5)
+[2026-06-15 11:47:22.644] [INFO ] src/reactor.c:228 - Sub-reactor[1] started, epoll_fd=9
+[2026-06-15 11:47:22.644] [INFO ] src/reactor.c:228 - Sub-reactor[2] started, epoll_fd=11
+[2026-06-15 11:47:22.644] [INFO ] src/reactor.c:228 - Sub-reactor[3] started, epoll_fd=13
+[2026-06-15 11:47:27.644] [INFO ] src/main.c:20 - Received signal 15, shutting down...
+[2026-06-15 11:47:27.644] [INFO ] src/reactor.c:364 - Main reactor stopped
+[2026-06-15 11:47:27.644] [INFO ] src/main.c:164 - Shutting down...
+[2026-06-15 11:47:27.645] [INFO ] src/reactor.c:279 - Sub-reactor[1] stopped
+[2026-06-15 11:47:27.645] [INFO ] src/reactor.c:279 - Sub-reactor[3] stopped
+[2026-06-15 11:47:27.644] [INFO ] src/reactor.c:279 - Sub-reactor[2] stopped
+[2026-06-15 11:47:27.644] [INFO ] src/reactor.c:279 - Sub-reactor[0] stopped
+[2026-06-15 11:47:32.644] [INFO ] src/heartbeat.c:64 - Heartbeat stopped
+[2026-06-15 11:47:32.644] [INFO ] src/reactor.c:552 - Stopping reactor...
+[2026-06-15 11:47:32.644] [INFO ] src/reactor.c:583 - Reactor stopped
+[2026-06-15 11:47:32.644] [INFO ] src/threadpool.c:111 - Threadpool destroyed
+[2026-06-15 11:47:32.644] [INFO ] src/client.c:28 - Client manager destroyed
+[2026-06-15 11:47:32.644] [INFO ] src/db.c:137 - MySQL connection closed
+[2026-06-15 11:47:44.235] [INFO ] src/main.c:110 - ========================================
+[2026-06-15 11:47:44.235] [INFO ] src/main.c:111 - IM Chat Server starting...
+[2026-06-15 11:47:44.235] [INFO ] src/main.c:112 - Configuration: port=8888, sub_reactors=4, biz_threads=4
+[2026-06-15 11:47:44.235] [INFO ] src/main.c:114 - ========================================
+[2026-06-15 11:47:44.237] [INFO ] src/db.c:48 - MySQL connected: chat_app@localhost:3306
+[2026-06-15 11:47:44.238] [INFO ] src/db.c:74 - Database 'chat_db' selected
+[2026-06-15 11:47:44.239] [INFO ] src/db.c:95 - Users table ready
+[2026-06-15 11:47:44.239] [INFO ] src/db.c:128 - Database initialization complete
+[2026-06-15 11:47:44.239] [INFO ] src/client.c:14 - Client manager initialized
+[2026-06-15 11:47:44.239] [INFO ] src/threadpool.c:81 - Threadpool created with 4 threads
+[2026-06-15 11:47:44.240] [INFO ] src/reactor.c:416 - Listening on port 8888
+[2026-06-15 11:47:44.240] [INFO ] src/reactor.c:503 - Reactor initialized: 4 sub-reactors
+[2026-06-15 11:47:44.241] [INFO ] src/heartbeat.c:54 - Heartbeat started: timeout=3600s, interval=5s
+[2026-06-15 11:47:44.241] [INFO ] src/main.c:157 - Server is ready. Waiting for connections...
+[2026-06-15 11:47:44.241] [INFO ] src/main.c:158 - Press Ctrl+C to stop the server
+[2026-06-15 11:47:44.241] [INFO ] src/reactor.c:228 - Sub-reactor[0] started, epoll_fd=7
+[2026-06-15 11:47:44.241] [INFO ] src/reactor.c:228 - Sub-reactor[2] started, epoll_fd=11
+[2026-06-15 11:47:44.241] [INFO ] src/reactor.c:228 - Sub-reactor[1] started, epoll_fd=9
+[2026-06-15 11:47:44.241] [INFO ] src/reactor.c:228 - Sub-reactor[3] started, epoll_fd=13
+[2026-06-15 11:47:44.241] [INFO ] src/reactor.c:291 - Main reactor started, listening on port (fd=5)
+[2026-06-15 11:47:53.744] [INFO ] src/client.c:70 - Client created: fd=15, ip=127.0.0.1:35678
+[2026-06-15 11:47:53.744] [INFO ] src/reactor.c:357 - Accepted connection: fd=15, ip=127.0.0.1:35678 -> sub[0]
+[2026-06-15 11:49:57.473] [INFO ] src/chat_service.c:161 - Login attempt: user='admin', pass_len=8
+[2026-06-15 11:49:57.474] [INFO ] src/db.c:236 - User login: admin (admin=1, status=1)
+[2026-06-15 11:49:57.474] [INFO ] src/chat_service.c:190 - User login: admin (fd=15, admin=1)
+[2026-06-15 11:52:38.139] [INFO ] src/client.c:70 - Client created: fd=16, ip=10.11.7.213:35204
+[2026-06-15 11:52:38.139] [INFO ] src/reactor.c:357 - Accepted connection: fd=16, ip=10.11.7.213:35204 -> sub[1]
+[2026-06-15 11:52:50.131] [INFO ] src/chat_service.c:161 - Login attempt: user='zhu', pass_len=4
+[2026-06-15 11:52:50.135] [INFO ] src/db.c:236 - User login: zhu (admin=0, status=1)
+[2026-06-15 11:52:50.135] [INFO ] src/chat_service.c:190 - User login: zhu (fd=16, admin=0)
+[2026-06-15 11:53:10.149] [INFO ] src/chat_service.c:369 - Admin 'admin' kicked user 'zhu'
+[2026-06-15 11:53:10.149] [INFO ] src/client.c:81 - Client destroyed: fd=16, user=zhu, ip=10.11.7.213:35204
+[2026-06-15 11:53:27.096] [INFO ] src/reactor.c:256 - fd=15 error/hangup event
+[2026-06-15 11:53:27.096] [INFO ] src/client.c:81 - Client destroyed: fd=15, user=admin, ip=127.0.0.1:35678
+[2026-06-15 11:58:58.368] [INFO ] src/main.c:20 - Received signal 2, shutting down...
+[2026-06-15 11:58:58.368] [INFO ] src/reactor.c:364 - Main reactor stopped
+[2026-06-15 11:58:58.368] [INFO ] src/main.c:164 - Shutting down...
+[2026-06-15 11:58:58.368] [INFO ] src/reactor.c:279 - Sub-reactor[3] stopped
+[2026-06-15 11:58:58.368] [INFO ] src/reactor.c:279 - Sub-reactor[2] stopped
+[2026-06-15 11:58:58.368] [INFO ] src/reactor.c:279 - Sub-reactor[0] stopped
+[2026-06-15 11:58:58.368] [INFO ] src/reactor.c:279 - Sub-reactor[1] stopped
+[2026-06-15 11:59:00.126] [INFO ] src/heartbeat.c:64 - Heartbeat stopped
+[2026-06-15 11:59:00.126] [INFO ] src/reactor.c:552 - Stopping reactor...
+[2026-06-15 11:59:00.126] [INFO ] src/reactor.c:583 - Reactor stopped
+[2026-06-15 11:59:00.133] [INFO ] src/threadpool.c:111 - Threadpool destroyed
+[2026-06-15 11:59:00.133] [INFO ] src/client.c:28 - Client manager destroyed
+[2026-06-15 11:59:00.133] [INFO ] src/db.c:137 - MySQL connection closed

@@ -1,23 +1,15 @@
 /**
- * 高并发 IM 聊天室 - 命令行客户端 
- *
- * 使用方法:
- *   ./chat_client <server_ip> <server_port>
- *
- * 命令:
- *   /login <用户名>       登录
- *   /msg <消息>          发送公屏消息 (直接输入文本也可)
- *   /to <用户名> <消息>   发送私聊消息
- *   /online              查看在线用户
- *   /quit                退出
+ * 高并发 IM 聊天室 - 命令行客户端
+ * 用法: ./chat_client <server_ip> <server_port>
  */
 
 #include "common.h"
 #include "protocol.h"
+#include <sys/ioctl.h>
 
 #define RECV_BUF_SIZE (64 * 1024)
 
-/* ── ANSI 颜色代码 ── */
+/* ── ANSI 颜色 ── */
 #define CLR_RESET   "\033[0m"
 #define CLR_BOLD    "\033[1m"
 #define CLR_DIM     "\033[2m"
@@ -28,7 +20,6 @@
 #define CLR_MAGENTA "\033[35m"
 #define CLR_CYAN    "\033[36m"
 #define CLR_WHITE   "\033[37m"
-#define CLR_BG_BLK  "\033[40m"
 
 /* ── 全局状态 ── */
 static int            g_sockfd    = -1;
@@ -38,7 +29,10 @@ static int            g_logged_in = 0;
 static int            g_is_admin  = 0;
 static pthread_mutex_t g_send_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-/* ── 工具函数 ── */
+/* ══════════════════════════════════════════
+ *  工具函数
+ * ══════════════════════════════════════════ */
+
 static void get_time_str(char *buf, size_t size)
 {
     struct timeval tv;
@@ -46,6 +40,14 @@ static void get_time_str(char *buf, size_t size)
     gettimeofday(&tv, NULL);
     localtime_r(&tv.tv_sec, &tm_info);
     strftime(buf, size, "%H:%M:%S", &tm_info);
+}
+
+static int get_term_width(void)
+{
+    struct winsize w;
+    if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == 0 && w.ws_col > 0)
+        return w.ws_col;
+    return 80;
 }
 
 static void print_separator(void)
@@ -59,28 +61,14 @@ static void print_system_msg(const char *icon, const char *color, const char *ms
            "     ", color, icon, msg);
 }
 
-/* ── 发送协议包 ── */
-static int send_packet(uint8_t type, const uint8_t *body, uint16_t body_len)
+static void print_prompt(void)
 {
-    uint8_t packet[PROTO_HEADER_LEN + PROTO_MAX_BODY_LEN];
-
-    proto_header_t hdr;
-    proto_build_header(&hdr, type, body_len);
-    proto_serialize_header(packet, &hdr);
-
-    if (body && body_len > 0) {
-        memcpy(packet + PROTO_HEADER_LEN, body, body_len);
-    }
-
-    size_t total = PROTO_HEADER_LEN + body_len;
-    pthread_mutex_lock(&g_send_mutex);
-    ssize_t n = send(g_sockfd, packet, total, MSG_NOSIGNAL);
-    pthread_mutex_unlock(&g_send_mutex);
-
-    return (n == (ssize_t)total) ? 0 : -1;
+    printf(g_logged_in ? CLR_CYAN "» " CLR_RESET : CLR_DIM "» " CLR_RESET);
+    fflush(stdout);
 }
 
-/* ── 简易 JSON 字段提取 ── */
+/* ── JSON 字段提取 ── */
+
 static int json_get_str(const char *json, const char *key,
                         char *out, size_t out_size)
 {
@@ -98,12 +86,289 @@ static int json_get_str(const char *json, const char *key,
     return 0;
 }
 
-/* ── 接收线程 ── */
-static void *receiver_thread(void *arg);
+/* 提取 JSON 中的整数字段, 如 "is_admin":1 */
+static int json_get_int(const char *json, const char *key)
+{
+    char search[32];
+    snprintf(search, sizeof(search), "\"%s\":", key);
+    const char *p = strstr(json, search);
+    return p ? atoi(p + strlen(search)) : 0;
+}
 
-/* ── 心跳线程 ── */
+/* ── 解析 "用户名 密码" 参数 ── */
+static int parse_user_pass(const char *rest, char *user, char *pass, size_t sz)
+{
+    while (*rest == ' ') rest++;
+    const char *space = strchr(rest, ' ');
+    if (!space) return -1;
+
+    /* 用户名 */
+    size_t ulen = (size_t)(space - rest);
+    if (ulen >= sz) ulen = sz - 1;
+    memcpy(user, rest, ulen);
+    user[ulen] = '\0';
+
+    /* 密码 */
+    const char *p = space + 1;
+    while (*p == ' ') p++;
+    if (*p == '\0') return -1;
+    size_t plen = strlen(p);
+    if (plen >= sz) plen = sz - 1;
+    memcpy(pass, p, plen);
+    pass[plen] = '\0';
+    return 0;
+}
+
+/* ══════════════════════════════════════════
+ *  消息气泡渲染 (统一左右对齐)
+ *
+ *  align:  1=右对齐(自己)  0=左对齐(别人)
+ *  color:  气泡边框颜色
+ *  label:  底部标签, 如 "18:30:05 qhl" 或 "18:30:05 zhu → 你"
+ *  msg:    消息内容
+ * ══════════════════════════════════════════ */
+
+static void draw_bubble(int align, const char *color,
+                        const char *label, const char *msg)
+{
+    int term_w = get_term_width();
+    int msg_w  = (int)strlen(msg) + 2;   /* " msg " */
+    int lbl_w  = (int)strlen(label);
+    int box_w  = msg_w > lbl_w ? msg_w : lbl_w;
+    if (box_w < 10) box_w = 10;
+    if (box_w > term_w - 4) box_w = term_w - 4;
+
+    /* 左对齐固定 2 列缩进, 右对齐动态计算 */
+    int pad = align ? (term_w - box_w - 4) : 2;
+    if (pad < 2) pad = 2;
+
+    printf("\n");
+
+    /* ╭───╮ */
+    printf("%*s%s╭", pad, "", color);
+    for (int i = 0; i < box_w - 2; i++) printf("─");
+    printf("╮" CLR_RESET "\n");
+
+    /* │ msg │ */
+    printf("%*s%s│" CLR_RESET " %s", pad, "", color, msg);
+    int fill = box_w - 2 - (int)strlen(msg) - 1;
+    for (int i = 0; i < (fill > 0 ? fill : 0); i++) printf(" ");
+    printf("%s│" CLR_RESET "\n", color);
+
+    /* ╰───╯ */
+    printf("%*s%s╰", pad, "", color);
+    for (int i = 0; i < box_w - 2; i++) printf("─");
+    printf("╯" CLR_RESET "\n");
+
+    /* 底部标签 */
+    printf("%*s" CLR_DIM "%s" CLR_RESET "\n", pad, "", label);
+}
+
+/* 快捷: 构建底部标签并绘制气泡 */
+static void show_self_public(const char *msg, const char *time_str)
+{
+    char label[128];
+    snprintf(label, sizeof(label), "%s %s%s", time_str,
+             g_is_admin ? "★" : "", g_username);
+    draw_bubble(1, CLR_CYAN, label, msg);
+}
+
+static void show_self_private(const char *to, const char *msg, const char *time_str)
+{
+    char label[128];
+    snprintf(label, sizeof(label), "%s 你 → %s", time_str, to);
+    draw_bubble(1, CLR_YELLOW, label, msg);
+}
+
+static void show_other_public(const char *from, const char *msg,
+                              const char *time_str, int is_admin)
+{
+    char label[128];
+    snprintf(label, sizeof(label), "%s%s %s",
+             is_admin ? "★" : "", from, time_str);
+    draw_bubble(0, CLR_GREEN, label, msg);
+}
+
+static void show_other_private(const char *from, const char *msg,
+                               const char *time_str, int is_admin)
+{
+    char label[128];
+    snprintf(label, sizeof(label), "%s%s → 你  %s",
+             is_admin ? "★" : "", from, time_str);
+    draw_bubble(0, CLR_YELLOW, label, msg);
+}
+
+/* ══════════════════════════════════════════
+ *  协议包收发
+ * ══════════════════════════════════════════ */
+
+static int send_packet(uint8_t type, const uint8_t *body, uint16_t body_len)
+{
+    uint8_t packet[PROTO_HEADER_LEN + PROTO_MAX_BODY_LEN];
+    proto_header_t hdr;
+    proto_build_header(&hdr, type, body_len);
+    proto_serialize_header(packet, &hdr);
+
+    if (body && body_len > 0)
+        memcpy(packet + PROTO_HEADER_LEN, body, body_len);
+
+    size_t total = PROTO_HEADER_LEN + body_len;
+    pthread_mutex_lock(&g_send_mutex);
+    ssize_t n = send(g_sockfd, packet, total, MSG_NOSIGNAL);
+    pthread_mutex_unlock(&g_send_mutex);
+    return (n == (ssize_t)total) ? 0 : -1;
+}
+
+/* ══════════════════════════════════════════
+ *  接收线程 - 解析协议包并渲染消息
+ * ══════════════════════════════════════════ */
+
+static void *receiver_thread(void *arg);
 static void *heartbeat_thread(void *arg);
 
+/* 处理公屏广播 (含 join/leave 事件) */
+static void handle_public_broadcast(const char *body, const char *time_str)
+{
+    char from[64] = "", msg[4096] = "", type[32] = "";
+    json_get_str(body, "from", from, sizeof(from));
+    json_get_str(body, "msg",  msg,  sizeof(msg));
+    json_get_str(body, "type", type, sizeof(type));
+    int is_admin = json_get_int(body, "is_admin");
+
+    if (strcmp(type, "join") == 0) {
+        print_system_msg("✦", CLR_GREEN, "");
+        printf(CLR_GREEN CLR_BOLD "  %s" CLR_RESET, from);
+        if (is_admin) printf(CLR_YELLOW "★" CLR_RESET);
+        printf(CLR_DIM " 加入聊天室" CLR_RESET);
+        /* 在线人数 */
+        int online = json_get_int(body, "online");
+        if (online > 0) printf(CLR_DIM "  当前在线: %d 人" CLR_RESET, online);
+        printf("\n");
+    } else if (strcmp(type, "leave") == 0) {
+        print_system_msg("✧", CLR_RED, "");
+        printf(CLR_RED CLR_BOLD "  %s" CLR_RESET CLR_DIM " 离开聊天室" CLR_RESET, from);
+        printf("\n");
+    } else {
+        /* 普通公屏消息: 根据是否自己发的决定对齐方向 */
+        if (strcmp(from, g_username) == 0)
+            show_self_public(msg, time_str);
+        else
+            show_other_public(from, msg, time_str, is_admin);
+    }
+}
+
+/* 处理私聊消息 */
+static void handle_private_resp(const char *body, const char *time_str)
+{
+    char from[64] = "", msg[4096] = "", status[32] = "";
+    json_get_str(body, "from", from, sizeof(from));
+    json_get_str(body, "msg",  msg,  sizeof(msg));
+    json_get_str(body, "status", status, sizeof(status));
+    int is_admin = json_get_int(body, "is_admin");
+
+    if (from[0]) {
+        /* 别人发给我的私聊 */
+        show_other_private(from, msg, time_str, is_admin);
+    } else if (strcmp(status, "ok") == 0) {
+        /* 发送成功确认 */
+        char to[64] = "";
+        json_get_str(body, "to", to, sizeof(to));
+        printf("\n" CLR_DIM "  ✓ 消息已送达 %s" CLR_RESET "\n", to);
+    } else {
+        print_system_msg("✗", CLR_RED, body);
+        printf("\n");
+    }
+}
+
+/* 处理登录响应 */
+static void handle_login_resp(const char *body)
+{
+    char status[32] = "", username[64] = "", err[256] = "";
+    json_get_str(body, "status",   status,   sizeof(status));
+    json_get_str(body, "username", username, sizeof(username));
+    json_get_str(body, "msg",      err,      sizeof(err));
+    int is_admin = json_get_int(body, "is_admin");
+
+    if (strcmp(status, "ok") == 0) {
+        g_logged_in = 1;
+        g_is_admin  = is_admin;
+        safe_strncpy(g_username, username, MAX_USERNAME_LEN);
+        printf("\n" CLR_GREEN " ✓ 登录成功!" CLR_RESET
+               "  欢迎 " CLR_BOLD CLR_CYAN "%s" CLR_RESET, username);
+        if (is_admin) printf(" " CLR_YELLOW "[管理员]" CLR_RESET);
+        printf("\n");
+        /* 登录成功后启动心跳线程 */
+        pthread_t hb_tid;
+        pthread_create(&hb_tid, NULL, heartbeat_thread, NULL);
+        pthread_detach(hb_tid);
+    } else {
+        printf("\n" CLR_RED " ✗ 登录失败: %s" CLR_RESET "\n",
+               err[0] ? err : "未知错误");
+        g_logged_in = 0;
+        g_username[0] = '\0';
+        g_is_admin = 0;
+    }
+}
+
+/* 处理简单状态响应 (注册/踢人) */
+static void handle_status_resp(const char *body, const char *ok_msg, const char *icon)
+{
+    char status[32] = "", msg[256] = "";
+    json_get_str(body, "status", status, sizeof(status));
+    json_get_str(body, "msg",    msg,    sizeof(msg));
+
+    if (strcmp(status, "ok") == 0) {
+        printf("\n" CLR_GREEN " %s %s" CLR_RESET "\n", icon,
+               msg[0] ? msg : ok_msg);
+    } else {
+        printf("\n" CLR_RED " %s %s" CLR_RESET "\n", icon,
+               msg[0] ? msg : "未知错误");
+    }
+}
+
+/* 处理在线列表响应 */
+static void handle_online_list(const char *body)
+{
+    printf("\n");
+    print_separator();
+    printf(CLR_CYAN CLR_BOLD "  ● 在线成员" CLR_RESET "\n");
+
+    char *arr = strstr(body, "\"users\":[");
+    if (arr) {
+        arr += 9;
+        int count = 0;
+        while (*arr && *arr != ']') {
+            char *name_start = strstr(arr, "\"name\":\"");
+            char *brace = strchr(arr, '}');
+            if (name_start && brace && name_start < brace) {
+                name_start += 8;
+                char name[64];
+                int i = 0;
+                while (*name_start && *name_start != '"' && i < 63)
+                    name[i++] = *name_start++;
+                name[i] = '\0';
+
+                int is_admin = 0;
+                char *adm = strstr(arr, "\"admin\":");
+                if (adm && adm < brace) is_admin = atoi(adm + 8);
+
+                if (name[0]) {
+                    printf("    " CLR_MAGENTA "●" CLR_RESET " %s", name);
+                    if (is_admin) printf(" " CLR_YELLOW "★管理员" CLR_RESET);
+                    printf("\n");
+                    count++;
+                }
+                arr = brace + 1;
+            } else {
+                arr++;
+            }
+        }
+        printf(CLR_DIM "  ── 共 %d 人在线 ──" CLR_RESET "\n", count);
+    }
+    print_separator();
+}
+
+/* 接收线程主循环 */
 static void *receiver_thread(void *arg)
 {
     (void)arg;
@@ -112,6 +377,7 @@ static void *receiver_thread(void *arg)
     char    time_str[16];
 
     while (g_running) {
+        /* select 超时 100ms, 便于检查 g_running */
         fd_set rfds;
         struct timeval tv = { .tv_sec = 0, .tv_usec = 100000 };
         FD_ZERO(&rfds);
@@ -121,16 +387,15 @@ static void *receiver_thread(void *arg)
         if (ret < 0) break;
         if (ret == 0) continue;
 
-        ssize_t n = recv(g_sockfd, buf + buf_len,
-                         sizeof(buf) - buf_len, 0);
+        ssize_t n = recv(g_sockfd, buf + buf_len, sizeof(buf) - buf_len, 0);
         if (n <= 0) {
             printf("\n" CLR_RED " ══ 连接已断开 ══" CLR_RESET "\n");
             g_running = 0;
             break;
         }
-
         buf_len += n;
 
+        /* 拆包循环: 从 buf 中逐个提取完整协议包 */
         while (buf_len >= PROTO_HEADER_LEN) {
             proto_header_t hdr;
             proto_deserialize_header(buf, &hdr);
@@ -142,7 +407,7 @@ static void *receiver_thread(void *arg)
             }
 
             size_t total_len = PROTO_HEADER_LEN + hdr.body_len;
-            if (buf_len < total_len) break;
+            if (buf_len < total_len) break;  /* 半包, 等待更多数据 */
 
             char body[PROTO_MAX_BODY_LEN + 1];
             if (hdr.body_len > 0)
@@ -151,216 +416,16 @@ static void *receiver_thread(void *arg)
 
             memmove(buf, buf + total_len, buf_len - total_len);
             buf_len -= total_len;
-
             get_time_str(time_str, sizeof(time_str));
 
+            /* 按消息类型分发处理 */
             switch (hdr.type) {
-
-            /* ── 公屏广播 ── */
-            case MSG_PUBLIC_BROADCAST: {
-                char from[64] = "", msg[4096] = "", type[32] = "";
-                int is_admin = 0;
-                json_get_str(body, "from", from, sizeof(from));
-                json_get_str(body, "msg",  msg,  sizeof(msg));
-                json_get_str(body, "type", type, sizeof(type));
-
-                /* 提取 is_admin */
-                char *adm = strstr(body, "\"is_admin\":");
-                if (adm) {
-                    adm += 11;  /* strlen("\"is_admin\":") = 11 */
-                    is_admin = atoi(adm);
-                }
-
-                if (strcmp(type, "join") == 0) {
-                    print_system_msg("✦", CLR_GREEN, "");
-                    printf(CLR_GREEN CLR_BOLD "  %s" CLR_RESET, from);
-                    if (is_admin) printf(CLR_YELLOW "★" CLR_RESET);
-                    printf(CLR_DIM " 加入聊天室" CLR_RESET);
-                    /* 在线人数 */
-                    char online_str[16] = "";
-                    char *on = strstr(body, "\"online\":");
-                    if (on) {
-                        on += 9;
-                        size_t i = 0;
-                        while (*on >= '0' && *on <= '9' && i < 15)
-                            online_str[i++] = *on++;
-                        online_str[i] = '\0';
-                    }
-                    if (online_str[0])
-                        printf(CLR_DIM "  当前在线: %s 人" CLR_RESET, online_str);
-                    printf("\n");
-                } else if (strcmp(type, "leave") == 0) {
-                    print_system_msg("✧", CLR_RED, "");
-                    printf(CLR_RED CLR_BOLD "  %s" CLR_RESET
-                           CLR_DIM " 离开聊天室" CLR_RESET, from);
-                    printf("\n");
-                } else {
-                    printf("\n" CLR_DIM "%s" CLR_RESET " ", time_str);
-                    if (is_admin) printf(CLR_YELLOW "★" CLR_RESET " ");
-                    printf(CLR_BOLD CLR_GREEN "%s" CLR_RESET
-                           CLR_DIM " » " CLR_RESET "%s\n",
-                           from, msg);
-                }
-                break;
-            }
-
-            /* ── 私聊消息 ── */
-            case MSG_PRIVATE_RESP: {
-                char from[64] = "", msg[4096] = "", status[32] = "";
-                int is_admin = 0;
-                json_get_str(body, "from", from, sizeof(from));
-                json_get_str(body, "msg",  msg,  sizeof(msg));
-                json_get_str(body, "status", status, sizeof(status));
-
-                /* 提取 is_admin */
-                char *adm = strstr(body, "\"is_admin\":");
-                if (adm) {
-                    adm += 11;  /* strlen("\"is_admin\":") = 11 */
-                    is_admin = atoi(adm);
-                }
-
-                if (from[0]) {
-                    /* 别人发给我的私聊 */
-                    printf("\n" CLR_DIM "%s" CLR_RESET " "
-                           CLR_BOLD CLR_YELLOW "[%s%s" CLR_YELLOW " → 你]" CLR_RESET "\n"
-                           "       " CLR_YELLOW "%s" CLR_RESET "\n",
-                           time_str, from, is_admin ? "★" : "", msg);
-                } else if (strcmp(status, "ok") == 0) {
-                    /* 我发出的私聊已送达 */
-                    char to[64] = "";
-                    json_get_str(body, "to", to, sizeof(to));
-                    printf(CLR_DIM "       ✓ 已送达 " CLR_BOLD "%s" CLR_RESET "\n", to);
-                } else {
-                    print_system_msg("✗", CLR_RED, body);
-                    printf("\n");
-                }
-                break;
-            }
-
-            /* ── 登录响应 ── */
-            case MSG_LOGIN_RESP: {
-                char status[32] = "", username[64] = "", err[256] = "";
-                json_get_str(body, "status",   status,   sizeof(status));
-                json_get_str(body, "username", username, sizeof(username));
-                json_get_str(body, "msg",      err,      sizeof(err));
-
-                /* 提取 is_admin */
-                char *admin_start = strstr(body, "\"is_admin\":");
-                int is_admin = 0;
-                if (admin_start) {
-                    admin_start += 11;  /* strlen("\"is_admin\":") = 11 */
-                    is_admin = atoi(admin_start);
-                }
-
-                if (strcmp(status, "ok") == 0) {
-                    g_logged_in = 1;
-                    g_is_admin = is_admin;
-                    safe_strncpy(g_username, username, MAX_USERNAME_LEN);
-                    printf("\n" CLR_GREEN " ✓ 登录成功!" CLR_RESET
-                           "  欢迎 " CLR_BOLD CLR_CYAN "%s" CLR_RESET,
-                           username);
-                    if (is_admin) {
-                        printf(" " CLR_YELLOW "[管理员]" CLR_RESET);
-                    }
-                    printf("\n");
-                    /* 启动心跳 */
-                    pthread_t hb_tid;
-                    pthread_create(&hb_tid, NULL, heartbeat_thread, NULL);
-                    pthread_detach(hb_tid);
-                } else {
-                    printf("\n" CLR_RED " ✗ 登录失败: %s" CLR_RESET "\n",
-                           err[0] ? err : "未知错误");
-                    g_logged_in = 0;
-                    g_username[0] = '\0';
-                    g_is_admin = 0;
-                }
-                break;
-            }
-
-            /* ── 注册响应 ── */
-            case MSG_REGISTER_RESP: {
-                char status[32] = "", msg[256] = "";
-                json_get_str(body, "status", status, sizeof(status));
-                json_get_str(body, "msg",    msg,    sizeof(msg));
-
-                if (strcmp(status, "ok") == 0) {
-                    printf("\n" CLR_GREEN " ✓ %s" CLR_RESET "\n",
-                           msg[0] ? msg : "注册成功! 请使用 /login 登录");
-                } else {
-                    printf("\n" CLR_RED " ✗ 注册失败: %s" CLR_RESET "\n",
-                           msg[0] ? msg : "未知错误");
-                }
-                break;
-            }
-
-            /* ── 踢人响应 ── */
-            case MSG_KICK_RESP: {
-                char status[32] = "", msg[256] = "";
-                json_get_str(body, "status", status, sizeof(status));
-                json_get_str(body, "msg",    msg,    sizeof(msg));
-
-                if (strcmp(status, "ok") == 0) {
-                    printf(CLR_DIM "       ✓ %s" CLR_RESET "\n", msg[0] ? msg : "操作成功");
-                } else {
-                    print_system_msg("✗", CLR_RED, msg[0] ? msg : body);
-                    printf("\n");
-                }
-                break;
-            }
-
-            /* ── 在线列表 ── */
-            case MSG_ONLINE_LIST_RESP:
-                printf("\n");
-                print_separator();
-                printf(CLR_CYAN CLR_BOLD "  ● 在线成员" CLR_RESET);
-                /* 提取 users 数组 */
-                {
-                    char *arr = strstr(body, "\"users\":[");
-                    if (arr) {
-                        arr += 9;
-                        int count = 0;
-                        printf("\n");
-                        while (*arr && *arr != ']') {
-                            /* 解析 {"name":"xxx","admin":0} */
-                            char *name_start = strstr(arr, "\"name\":\"");
-                            if (name_start && name_start < strchr(arr, '}') + 1) {
-                                name_start += 8;  /* strlen("\"name\":\"") = 8 */
-                                char name[64];
-                                int i = 0;
-                                while (*name_start && *name_start != '"' && i < 63)
-                                    name[i++] = *name_start++;
-                                name[i] = '\0';
-
-                                int is_admin = 0;
-                                char *admin_start = strstr(arr, "\"admin\":");
-                                if (admin_start && admin_start < strchr(arr, '}') + 1) {
-                                    admin_start += 8;  /* strlen("\"admin\":") = 8 */
-                                    is_admin = atoi(admin_start);
-                                }
-
-                                if (name[0]) {
-                                    printf("    " CLR_MAGENTA "●" CLR_RESET " %s", name);
-                                    if (is_admin) {
-                                        printf(" " CLR_YELLOW "★管理员" CLR_RESET);
-                                    }
-                                    printf("\n");
-                                    count++;
-                                }
-                                /* 跳到下一个对象 */
-                                char *brace = strchr(arr, '}');
-                                if (brace) arr = brace + 1;
-                                else arr++;
-                            } else {
-                                arr++;
-                            }
-                        }
-                        printf(CLR_DIM "  ── 共 %d 人在线 ──" CLR_RESET "\n", count);
-                    }
-                }
-                print_separator();
-                break;
-
-            /* ── 错误响应 ── */
+            case MSG_PUBLIC_BROADCAST: handle_public_broadcast(body, time_str); break;
+            case MSG_PRIVATE_RESP:     handle_private_resp(body, time_str);     break;
+            case MSG_LOGIN_RESP:       handle_login_resp(body);                 break;
+            case MSG_REGISTER_RESP:    handle_status_resp(body, "注册成功! 请使用 /login 登录", "✓"); break;
+            case MSG_KICK_RESP:        handle_status_resp(body, "操作成功", "✓"); break;
+            case MSG_ONLINE_LIST_RESP: handle_online_list(body);                break;
             case MSG_ERROR_RESP: {
                 char msg[256] = "";
                 json_get_str(body, "msg", msg, sizeof(msg));
@@ -368,23 +433,16 @@ static void *receiver_thread(void *arg)
                 printf("\n");
                 break;
             }
-
-            /* ── 心跳响应静默 ── */
-            case MSG_HEARTBEAT_RESP:
-                break;
-
-            default:
-                break;
+            case MSG_HEARTBEAT_RESP: break;  /* 静默 */
+            default: break;
             }
-
             fflush(stdout);
         }
     }
-
     return NULL;
 }
 
-/* ── 心跳线程 ── */
+/* 心跳线程: 每 10 秒发送心跳保活 */
 static void *heartbeat_thread(void *arg)
 {
     (void)arg;
@@ -396,22 +454,37 @@ static void *heartbeat_thread(void *arg)
     return NULL;
 }
 
-/* ── 输入提示 ── */
-static void print_prompt(void)
+/* ══════════════════════════════════════════
+ *  启动画面
+ * ══════════════════════════════════════════ */
+
+static void show_welcome(const char *ip, int port)
 {
-    if (g_logged_in) {
-        printf(CLR_CYAN CLR_BOLD "[%s]" CLR_RESET, g_username);
-        if (g_is_admin) {
-            printf(CLR_YELLOW "★" CLR_RESET);
-        }
-        printf(CLR_GREEN " ➤ " CLR_RESET);
-    } else {
-        printf(CLR_DIM "guest" CLR_RESET " ➤ ");
-    }
-    fflush(stdout);
+    printf("\033[2J\033[H");
+    int pad = (get_term_width() - 40) / 2;
+    if (pad < 0) pad = 0;
+    printf("\n\n");
+    printf("%*s" CLR_CYAN CLR_BOLD "════════════════════════════════" CLR_RESET "\n", pad, "");
+    printf("%*s" CLR_CYAN CLR_BOLD "    💬  IM 聊天室  客户端       " CLR_RESET "\n", pad, "");
+    printf("%*s" CLR_CYAN CLR_BOLD "════════════════════════════════" CLR_RESET "\n", pad, "");
+    printf("\n");
+    printf("%*s" CLR_DIM "%s:%d" CLR_RESET "\n\n", pad + 4, "", ip, port);
+    printf("%*s" CLR_CYAN "/register" CLR_RESET " <用户> <密码>    注册\n", pad, "");
+    printf("%*s" CLR_CYAN "/login" CLR_RESET "    <用户> <密码>    登录\n", pad, "");
+    printf("\n");
+    printf("%*s" CLR_GREEN "直接输入" CLR_RESET "                  公屏消息\n", pad, "");
+    printf("%*s" CLR_YELLOW "/to" CLR_RESET "      <用户> <消息>    私聊\n", pad, "");
+    printf("%*s" CLR_MAGENTA "/online" CLR_RESET "                   在线列表\n", pad, "");
+    printf("\n");
+    printf("%*s" CLR_RED "/kick" CLR_RESET "      <用户>          踢人\n", pad, "");
+    printf("%*s" CLR_RED "/quit" CLR_RESET "                       退出\n", pad, "");
+    printf("\n\n");
 }
 
-/* ── 主入口 ── */
+/* ══════════════════════════════════════════
+ *  主入口 - 连接服务器 + 命令循环
+ * ══════════════════════════════════════════ */
+
 int main(int argc, char *argv[])
 {
     if (argc < 3) {
@@ -423,7 +496,7 @@ int main(int argc, char *argv[])
     const char *server_ip = argv[1];
     int port = atoi(argv[2]);
 
-    /* 创建 socket + 连接 */
+    /* 建立 TCP 连接 */
     g_sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (g_sockfd < 0) { perror("socket"); return 1; }
 
@@ -438,40 +511,14 @@ int main(int argc, char *argv[])
         perror("connect"); close(g_sockfd); return 1;
     }
 
-    /* ── 启动画面 ── */
-    printf("\033[2J\033[H");  /* 清屏 */
-    printf(CLR_CYAN CLR_BOLD);
-    printf("  ╔══════════════════════════════════════╗\n");
-    printf("  ║         IM 聊天室 客户端              ║\n");
-    printf("  ╚══════════════════════════════════════╝\n");
-    printf(CLR_RESET);
-    printf(CLR_DIM "  ● 服务器: %s:%d" CLR_RESET "\n", server_ip, port);
-    print_separator();
-    printf(CLR_DIM "  命令:" CLR_RESET "\n");
-    printf("    " CLR_CYAN "/register <用户名> <密码>" CLR_RESET
-           "  注册新账号\n");
-    printf("    " CLR_CYAN "/login <用户名> <密码>" CLR_RESET
-           "     登录\n");
-    printf("    " CLR_GREEN "/msg <消息>" CLR_RESET
-           "        公屏消息 (直接输入文本即可)\n");
-    printf("    " CLR_YELLOW "/to <用户名> <消息>" CLR_RESET
-           "  私聊\n");
-    printf("    " CLR_MAGENTA "/online" CLR_RESET
-           "              查看在线成员\n");
-    printf("    " CLR_RED "/kick <用户名>" CLR_RESET
-           "       管理员踢人\n");
-    printf("    " CLR_RED "/quit" CLR_RESET
-           "                退出\n");
-    print_separator();
-    printf("\n");
-
     signal(SIGPIPE, SIG_IGN);
+    show_welcome(server_ip, port);
 
-    /* 接收线程 */
+    /* 启动接收线程 */
     pthread_t recv_tid;
     pthread_create(&recv_tid, NULL, receiver_thread, NULL);
 
-    /* 主循环 */
+    /* ── 主循环: 读取用户输入并分发命令 ── */
     char input[MAX_MSG_LEN];
     print_prompt();
 
@@ -480,110 +527,65 @@ int main(int argc, char *argv[])
         if (len > 0 && input[len - 1] == '\n') input[len - 1] = '\0';
         if (input[0] == '\0') { print_prompt(); continue; }
 
-        /* /quit */
+        /* /quit - 退出 */
         if (strcmp(input, "/quit") == 0) {
             g_running = 0;
             break;
         }
 
-        /* /help */
+        /* /help - 帮助 */
         if (strcmp(input, "/help") == 0 || strcmp(input, "/h") == 0) {
-            printf(CLR_DIM "\n  命令列表:\n" CLR_RESET);
-            printf("    /register <用户名> <密码>  /login <用户名> <密码>\n");
-            printf("    /msg <消息>  /to <用户> <消息>\n");
-            printf("    /online  /kick <用户名>  /quit  /help\n\n");
+            printf("\n");
+            printf(CLR_DIM "  账号" CLR_RESET "  /register /login\n");
+            printf(CLR_DIM "  聊天" CLR_RESET "  直接输入文字 /to /online\n");
+            printf(CLR_DIM "  管理" CLR_RESET "  /kick /quit\n\n");
             print_prompt();
             continue;
         }
 
-        /* /register <用户名> <密码> */
+        /* /register <用户> <密码> */
         if (strncmp(input, "/register ", 10) == 0) {
-            const char *rest = input + 10;
-            while (*rest == ' ') rest++;
-            char reg_user[MAX_USERNAME_LEN], reg_pass[MAX_USERNAME_LEN];
-            memset(reg_user, 0, sizeof(reg_user));
-            memset(reg_pass, 0, sizeof(reg_pass));
-
-            const char *space = strchr(rest, ' ');
-            if (!space) {
+            char user[MAX_USERNAME_LEN] = "", pass[MAX_USERNAME_LEN] = "";
+            if (parse_user_pass(input + 10, user, pass, MAX_USERNAME_LEN) < 0) {
                 printf(CLR_RED "  ✗ 用法: /register <用户名> <密码>" CLR_RESET "\n");
-                print_prompt();
-                continue;
+            } else {
+                char body[512];
+                snprintf(body, sizeof(body),
+                         "{\"username\":\"%s\",\"password\":\"%s\"}", user, pass);
+                send_packet(MSG_REGISTER_REQ, (const uint8_t *)body, strlen(body));
+                printf(CLR_DIM "       注册中..." CLR_RESET "\n");
             }
-            size_t name_len = (size_t)(space - rest);
-            if (name_len >= MAX_USERNAME_LEN) name_len = MAX_USERNAME_LEN - 1;
-            memcpy(reg_user, rest, name_len);
-            reg_user[name_len] = '\0';
-
-            const char *pass_text = space + 1;
-            while (*pass_text == ' ') pass_text++;
-            size_t pass_len = strlen(pass_text);
-            if (pass_len >= MAX_USERNAME_LEN) pass_len = MAX_USERNAME_LEN - 1;
-            memcpy(reg_pass, pass_text, pass_len);
-            reg_pass[pass_len] = '\0';
-
-            if (strlen(reg_user) == 0 || strlen(reg_pass) == 0) {
-                printf(CLR_RED "  ✗ 用法: /register <用户名> <密码>" CLR_RESET "\n");
-                print_prompt();
-                continue;
-            }
-
-            char reg_body[512];
-            snprintf(reg_body, sizeof(reg_body),
-                     "{\"username\":\"%s\",\"password\":\"%s\"}",
-                     reg_user, reg_pass);
-            send_packet(MSG_REGISTER_REQ,
-                       (const uint8_t *)reg_body, strlen(reg_body));
-            printf(CLR_DIM "       注册中..." CLR_RESET "\n");
             print_prompt();
             continue;
         }
 
-        /* /login <用户名> <密码> */
+        /* /login <用户> <密码> */
         if (strncmp(input, "/login ", 7) == 0) {
+            char user[MAX_USERNAME_LEN] = "", pass[MAX_USERNAME_LEN] = "";
             const char *rest = input + 7;
             while (*rest == ' ') rest++;
-            char login_user[MAX_USERNAME_LEN], login_pass[MAX_USERNAME_LEN];
-            memset(login_user, 0, sizeof(login_user));
-            memset(login_pass, 0, sizeof(login_pass));
 
-            const char *space = strchr(rest, ' ');
-            if (space) {
-                /* 有密码: /login user pass */
-                size_t name_len = (size_t)(space - rest);
-                if (name_len >= MAX_USERNAME_LEN) name_len = MAX_USERNAME_LEN - 1;
-                memcpy(login_user, rest, name_len);
-                login_user[name_len] = '\0';
-
-                const char *pass_text = space + 1;
-                while (*pass_text == ' ') pass_text++;
-                size_t pass_len = strlen(pass_text);
-                if (pass_len >= MAX_USERNAME_LEN) pass_len = MAX_USERNAME_LEN - 1;
-                memcpy(login_pass, pass_text, pass_len);
-                login_pass[pass_len] = '\0';
+            /* 支持无密码格式: /login user */
+            if (strchr(rest, ' ')) {
+                if (parse_user_pass(rest, user, pass, MAX_USERNAME_LEN) < 0) {
+                    printf(CLR_RED "  ✗ 用法: /login <用户名> <密码>" CLR_RESET "\n");
+                    print_prompt();
+                    continue;
+                }
             } else {
-                /* 无密码: 兼容旧格式 */
-                size_t name_len = strlen(rest);
-                if (name_len >= MAX_USERNAME_LEN) name_len = MAX_USERNAME_LEN - 1;
-                memcpy(login_user, rest, name_len);
-                login_user[name_len] = '\0';
+                safe_strncpy(user, rest, MAX_USERNAME_LEN);
             }
 
-            if (strlen(login_user) == 0) {
+            if (user[0] == '\0') {
                 printf(CLR_RED "  ✗ 用法: /login <用户名> <密码>" CLR_RESET "\n");
-                print_prompt();
-                continue;
+            } else {
+                char body[512];
+                snprintf(body, sizeof(body),
+                         "{\"username\":\"%s\",\"password\":\"%s\"}", user, pass);
+                send_packet(MSG_LOGIN_REQ, (const uint8_t *)body, strlen(body));
+                safe_strncpy(g_username, user, MAX_USERNAME_LEN);
+                printf(CLR_DIM "       登录中..." CLR_RESET "\n");
             }
-
-            char login_body[512];
-            snprintf(login_body, sizeof(login_body),
-                     "{\"username\":\"%s\",\"password\":\"%s\"}",
-                     login_user, login_pass);
-            send_packet(MSG_LOGIN_REQ,
-                       (const uint8_t *)login_body, strlen(login_body));
-            /* 先乐观设置, 服务器响应会最终确认 */
-            safe_strncpy(g_username, login_user, MAX_USERNAME_LEN);
-            printf(CLR_DIM "       登录中..." CLR_RESET "\n");
             print_prompt();
             continue;
         }
@@ -592,68 +594,68 @@ int main(int argc, char *argv[])
         if (strncmp(input, "/kick ", 6) == 0) {
             const char *target = input + 6;
             while (*target == ' ') target++;
-            if (strlen(target) == 0) {
+            if (target[0] == '\0') {
                 printf(CLR_RED "  ✗ 用法: /kick <用户名>" CLR_RESET "\n");
-                print_prompt();
-                continue;
+            } else {
+                char body[256];
+                snprintf(body, sizeof(body), "{\"username\":\"%s\"}", target);
+                send_packet(MSG_KICK_REQ, (const uint8_t *)body, strlen(body));
             }
-            char kick_body[256];
-            snprintf(kick_body, sizeof(kick_body),
-                     "{\"username\":\"%s\"}", target);
-            send_packet(MSG_KICK_REQ,
-                       (const uint8_t *)kick_body, strlen(kick_body));
             print_prompt();
             continue;
         }
 
-        /* /online */
+        /* /online - 查询在线列表 */
         if (strcmp(input, "/online") == 0) {
             send_packet(MSG_ONLINE_LIST_REQ, NULL, 0);
             print_prompt();
             continue;
         }
 
-        /* /to <用户名> <消息> */
+        /* /to <用户> <消息> - 私聊 */
         if (strncmp(input, "/to ", 4) == 0) {
             const char *rest = input + 4;
             while (*rest == ' ') rest++;
-            char target[MAX_USERNAME_LEN], msg[MAX_MSG_LEN];
             const char *space = strchr(rest, ' ');
             if (!space) {
                 printf(CLR_RED "  ✗ 用法: /to <用户名> <消息>" CLR_RESET "\n");
                 print_prompt();
                 continue;
             }
-            size_t name_len = (size_t)(space - rest);
-            if (name_len >= MAX_USERNAME_LEN) name_len = MAX_USERNAME_LEN - 1;
-            memcpy(target, rest, name_len);
-            target[name_len] = '\0';
+            char target[MAX_USERNAME_LEN];
+            size_t nlen = (size_t)(space - rest);
+            if (nlen >= MAX_USERNAME_LEN) nlen = MAX_USERNAME_LEN - 1;
+            memcpy(target, rest, nlen);
+            target[nlen] = '\0';
+
             const char *msg_text = space + 1;
             while (*msg_text == ' ') msg_text++;
-            snprintf(msg, sizeof(msg),
+
+            char body[MAX_MSG_LEN];
+            snprintf(body, sizeof(body),
                      "{\"to\":\"%s\",\"msg\":\"%s\"}", target, msg_text);
-            send_packet(MSG_PRIVATE_REQ, (const uint8_t *)msg, strlen(msg));
-            printf(CLR_DIM "       → " CLR_BOLD CLR_YELLOW "%s" CLR_RESET
-                   CLR_DIM ": " CLR_RESET "%s\n", target, msg_text);
+            send_packet(MSG_PRIVATE_REQ, (const uint8_t *)body, strlen(body));
+
+            /* 本地立即显示右对齐气泡 */
+            char t_str[16];
+            get_time_str(t_str, sizeof(t_str));
+            show_self_private(target, msg_text, t_str);
             print_prompt();
             continue;
         }
 
-        /* 公屏消息 (/msg 或直接输入) */
+        /* 公屏消息: 直接输入文字或 /msg */
         const char *msg_text = input;
         if (strncmp(input, "/msg ", 5) == 0) {
             msg_text = input + 5;
             while (*msg_text == ' ') msg_text++;
         }
-        if (g_logged_in && strlen(msg_text) > 0) {
-            printf(CLR_DIM "       " CLR_BOLD CLR_BLUE "[你]" CLR_RESET
-                   CLR_DIM " » " CLR_RESET "%s\n", msg_text);
-        }
-        send_packet(MSG_PUBLIC_MSG, (const uint8_t *)msg_text, strlen(msg_text));
+        if (g_logged_in && msg_text[0])
+            send_packet(MSG_PUBLIC_MSG, (const uint8_t *)msg_text, strlen(msg_text));
         print_prompt();
     }
 
-    /* 清理 */
+    /* 清理资源 */
     g_running = 0;
     shutdown(g_sockfd, SHUT_RDWR);
     close(g_sockfd);

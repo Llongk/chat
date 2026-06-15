@@ -1,0 +1,25 @@
+{
+  "configurations": [
+    {
+      "name": "Linux",
+      "compilerPath": "/usr/bin/gcc",
+      "compileCommands": "${workspaceFolder}/chat/compile_commands.json",
+      "intelliSenseMode": "linux-gcc-x64",
+      "cStandard": "c11",
+      "cppStandard": "c17",
+      "includePath": [
+        "${workspaceFolder}/chat/include",
+        "${workspaceFolder}/chat/mysql_dev/usr/include",
+        "${workspaceFolder}/chat"
+      ],
+      "browse": {
+        "path": [
+          "${workspaceFolder}/chat/include",
+          "${workspaceFolder}/chat/mysql_dev/usr/include",
+          "${workspaceFolder}/chat"
+        ]
+      }
+    }
+  ],
+  "version": 4
+}

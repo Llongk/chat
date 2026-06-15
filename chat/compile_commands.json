@@ -1,0 +1,189 @@
+[
+    {
+        "arguments": [
+            "gcc",
+            "-c",
+            "-Wall",
+            "-Wextra",
+            "-g",
+            "-O2",
+            "-Iinclude",
+            "-I/home/qhl/code/chat/mysql_dev/usr/include",
+            "-o",
+            "obj/client.o",
+            "src/client.c"
+        ],
+        "directory": "/home/qhl/code/chat",
+        "file": "src/client.c"
+    },
+    {
+        "arguments": [
+            "gcc",
+            "-c",
+            "-Wall",
+            "-Wextra",
+            "-g",
+            "-O2",
+            "-Iinclude",
+            "-I/home/qhl/code/chat/mysql_dev/usr/include",
+            "-o",
+            "obj/logger.o",
+            "src/logger.c"
+        ],
+        "directory": "/home/qhl/code/chat",
+        "file": "src/logger.c"
+    },
+    {
+        "arguments": [
+            "gcc",
+            "-c",
+            "-Wall",
+            "-Wextra",
+            "-g",
+            "-O2",
+            "-Iinclude",
+            "-I/home/qhl/code/chat/mysql_dev/usr/include",
+            "-o",
+            "obj/client_main.o",
+            "src/client_main.c"
+        ],
+        "directory": "/home/qhl/code/chat",
+        "file": "src/client_main.c"
+    },
+    {
+        "arguments": [
+            "gcc",
+            "-c",
+            "-Wall",
+            "-Wextra",
+            "-g",
+            "-O2",
+            "-Iinclude",
+            "-I/home/qhl/code/chat/mysql_dev/usr/include",
+            "-o",
+            "obj/chat_service.o",
+            "src/chat_service.c"
+        ],
+        "directory": "/home/qhl/code/chat",
+        "file": "src/chat_service.c"
+    },
+    {
+        "arguments": [
+            "gcc",
+            "-c",
+            "-Wall",
+            "-Wextra",
+            "-g",
+            "-O2",
+            "-Iinclude",
+            "-I/home/qhl/code/chat/mysql_dev/usr/include",
+            "-o",
+            "obj/reactor.o",
+            "src/reactor.c"
+        ],
+        "directory": "/home/qhl/code/chat",
+        "file": "src/reactor.c"
+    },
+    {
+        "arguments": [
+            "gcc",
+            "-c",
+            "-Wall",
+            "-Wextra",
+            "-g",
+            "-O2",
+            "-Iinclude",
+            "-I/home/qhl/code/chat/mysql_dev/usr/include",
+            "-o",
+            "obj/threadpool.o",
+            "src/threadpool.c"
+        ],
+        "directory": "/home/qhl/code/chat",
+        "file": "src/threadpool.c"
+    },
+    {
+        "arguments": [
+            "gcc",
+            "-c",
+            "-Wall",
+            "-Wextra",
+            "-g",
+            "-O2",
+            "-Iinclude",
+            "-I/home/qhl/code/chat/mysql_dev/usr/include",
+            "-o",
+            "obj/heartbeat.o",
+            "src/heartbeat.c"
+        ],
+        "directory": "/home/qhl/code/chat",
+        "file": "src/heartbeat.c"
+    },
+    {
+        "arguments": [
+            "gcc",
+            "-c",
+            "-Wall",
+            "-Wextra",
+            "-g",
+            "-O2",
+            "-Iinclude",
+            "-I/home/qhl/code/chat/mysql_dev/usr/include",
+            "-o",
+            "obj/ringbuf.o",
+            "src/ringbuf.c"
+        ],
+        "directory": "/home/qhl/code/chat",
+        "file": "src/ringbuf.c"
+    },
+    {
+        "arguments": [
+            "gcc",
+            "-c",
+            "-Wall",
+            "-Wextra",
+            "-g",
+            "-O2",
+            "-Iinclude",
+            "-I/home/qhl/code/chat/mysql_dev/usr/include",
+            "-o",
+            "obj/ratelimit.o",
+            "src/ratelimit.c"
+        ],
+        "directory": "/home/qhl/code/chat",
+        "file": "src/ratelimit.c"
+    },
+    {
+        "arguments": [
+            "gcc",
+            "-c",
+            "-Wall",
+            "-Wextra",
+            "-g",
+            "-O2",
+            "-Iinclude",
+            "-I/home/qhl/code/chat/mysql_dev/usr/include",
+            "-o",
+            "obj/main.o",
+            "src/main.c"
+        ],
+        "directory": "/home/qhl/code/chat",
+        "file": "src/main.c"
+    },
+    {
+        "arguments": [
+            "gcc",
+            "-c",
+            "-Wall",
+            "-Wextra",
+            "-g",
+            "-O2",
+            "-Iinclude",
+            "-I/home/qhl/code/chat/mysql_dev/usr/include",
+            "-o",
+            "obj/db.o",
+            "src/db.c"
+        ],
+        "directory": "/home/qhl/code/chat",
+        "file": "src/db.c"
+    }
+]

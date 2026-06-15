@@ -1,5 +1,5 @@
 /**
- * 高并发 IM 聊天室 - 命令行客户端 (美化版)
+ * 高并发 IM 聊天室 - 命令行客户端 
  *
  * 使用方法:
  *   ./chat_client <server_ip> <server_port>

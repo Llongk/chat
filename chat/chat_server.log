@@ -78,3 +78,629 @@
 [2026-06-15 11:59:00.133] [INFO ] src/threadpool.c:111 - Threadpool destroyed
 [2026-06-15 11:59:00.133] [INFO ] src/client.c:28 - Client manager destroyed
 [2026-06-15 11:59:00.133] [INFO ] src/db.c:137 - MySQL connection closed
+[2026-06-15 16:19:08.934] [INFO ] src/main.c:110 - ========================================
+[2026-06-15 16:19:08.934] [INFO ] src/main.c:111 - IM Chat Server starting...
+[2026-06-15 16:19:08.934] [INFO ] src/main.c:112 - Configuration: port=8888, sub_reactors=4, biz_threads=4
+[2026-06-15 16:19:08.934] [INFO ] src/main.c:114 - ========================================
+[2026-06-15 16:19:08.947] [INFO ] src/db.c:48 - MySQL connected: chat_app@localhost:3306
+[2026-06-15 16:19:08.955] [INFO ] src/db.c:74 - Database 'chat_db' selected
+[2026-06-15 16:19:08.962] [INFO ] src/db.c:95 - Users table ready
+[2026-06-15 16:19:08.963] [INFO ] src/db.c:128 - Database initialization complete
+[2026-06-15 16:19:08.963] [INFO ] src/client.c:14 - Client manager initialized
+[2026-06-15 16:19:08.963] [INFO ] src/threadpool.c:81 - Threadpool created with 4 threads
+[2026-06-15 16:19:08.963] [INFO ] src/reactor.c:416 - Listening on port 8888
+[2026-06-15 16:19:08.963] [INFO ] src/reactor.c:503 - Reactor initialized: 4 sub-reactors
+[2026-06-15 16:19:08.964] [INFO ] src/heartbeat.c:54 - Heartbeat started: timeout=3600s, interval=5s
+[2026-06-15 16:19:08.964] [INFO ] src/main.c:157 - Server is ready. Waiting for connections...
+[2026-06-15 16:19:08.964] [INFO ] src/main.c:158 - Press Ctrl+C to stop the server
+[2026-06-15 16:19:08.964] [INFO ] src/reactor.c:228 - Sub-reactor[0] started, epoll_fd=7
+[2026-06-15 16:19:08.964] [INFO ] src/reactor.c:228 - Sub-reactor[1] started, epoll_fd=9
+[2026-06-15 16:19:08.964] [INFO ] src/reactor.c:291 - Main reactor started, listening on port (fd=5)
+[2026-06-15 16:19:08.964] [INFO ] src/reactor.c:228 - Sub-reactor[2] started, epoll_fd=11
+[2026-06-15 16:19:08.964] [INFO ] src/reactor.c:228 - Sub-reactor[3] started, epoll_fd=13
+[2026-06-15 16:24:24.529] [INFO ] src/client.c:70 - Client created: fd=15, ip=10.11.8.93:50080
+[2026-06-15 16:24:24.529] [INFO ] src/reactor.c:357 - Accepted connection: fd=15, ip=10.11.8.93:50080 -> sub[0]
+[2026-06-15 16:25:40.617] [INFO ] src/db.c:168 - User registered: lzf
+[2026-06-15 16:25:40.617] [INFO ] src/chat_service.c:292 - User registered: lzf
+[2026-06-15 16:26:10.542] [INFO ] src/reactor.c:256 - fd=15 error/hangup event
+[2026-06-15 16:26:10.542] [INFO ] src/client.c:81 - Client destroyed: fd=15, user=, ip=10.11.8.93:50080
+[2026-06-15 16:26:15.797] [INFO ] src/client.c:70 - Client created: fd=15, ip=10.11.8.93:37372
+[2026-06-15 16:26:15.797] [INFO ] src/reactor.c:357 - Accepted connection: fd=15, ip=10.11.8.93:37372 -> sub[1]
+[2026-06-15 16:26:29.470] [INFO ] src/chat_service.c:161 - Login attempt: user='lzf', pass_len=3
+[2026-06-15 16:26:29.471] [INFO ] src/db.c:236 - User login: lzf (admin=0, status=1)
+[2026-06-15 16:26:29.471] [INFO ] src/chat_service.c:190 - User login: lzf (fd=15, admin=0)
+[2026-06-15 16:26:46.616] [INFO ] src/chat_service.c:410 - Public msg from lzf: 1111
+[2026-06-15 16:27:04.897] [INFO ] src/client.c:70 - Client created: fd=16, ip=127.0.0.1:38464
+[2026-06-15 16:27:04.897] [INFO ] src/reactor.c:357 - Accepted connection: fd=16, ip=127.0.0.1:38464 -> sub[2]
+[2026-06-15 16:27:15.254] [INFO ] src/chat_service.c:161 - Login attempt: user='admin', pass_len=8
+[2026-06-15 16:27:15.254] [INFO ] src/db.c:236 - User login: admin (admin=1, status=1)
+[2026-06-15 16:27:15.254] [INFO ] src/chat_service.c:190 - User login: admin (fd=16, admin=1)
+[2026-06-15 16:27:21.820] [INFO ] src/chat_service.c:410 - Public msg from admin: 你好
+[2026-06-15 16:27:33.829] [INFO ] src/chat_service.c:410 - Public msg from admin: 李卓峰
+[2026-06-15 16:27:41.925] [INFO ] src/chat_service.c:410 - Public msg from lzf: 我/msg ?
+[2026-06-15 16:27:44.166] [INFO ] src/chat_service.c:410 - Public msg from admin: /
+[2026-06-15 16:27:45.286] [INFO ] src/chat_service.c:410 - Public msg from lzf: ?
+[2026-06-15 16:27:52.908] [INFO ] src/chat_service.c:410 - Public msg from lzf: qin  h  long
+[2026-06-15 16:28:00.177] [INFO ] src/chat_service.c:410 - Public msg from admin: 能看见我吗
+[2026-06-15 16:28:06.506] [INFO ] src/chat_service.c:410 - Public msg from lzf: 看不见阿
+[2026-06-15 16:28:13.470] [INFO ] src/chat_service.c:410 - Public msg from admin: 你sb
+[2026-06-15 16:28:17.608] [INFO ] src/chat_service.c:410 - Public msg from lzf: 你人呢
+[2026-06-15 16:28:25.400] [INFO ] src/chat_service.c:410 - Public msg from admin: sb 
+[2026-06-15 16:28:50.379] [INFO ] src/chat_service.c:410 - Public msg from admin: 给你踢了
+[2026-06-15 16:28:56.040] [INFO ] src/chat_service.c:410 - Public msg from admin: 李卓峰
+[2026-06-15 16:29:16.617] [INFO ] src/reactor.c:256 - fd=15 error/hangup event
+[2026-06-15 16:29:16.617] [INFO ] src/client.c:81 - Client destroyed: fd=15, user=lzf, ip=10.11.8.93:37372
+[2026-06-15 16:29:37.416] [INFO ] src/reactor.c:256 - fd=16 error/hangup event
+[2026-06-15 16:29:37.416] [INFO ] src/client.c:81 - Client destroyed: fd=16, user=admin, ip=127.0.0.1:38464
+[2026-06-15 16:29:45.847] [INFO ] src/main.c:20 - Received signal 2, shutting down...
+[2026-06-15 16:29:45.847] [INFO ] src/reactor.c:364 - Main reactor stopped
+[2026-06-15 16:29:45.847] [INFO ] src/main.c:164 - Shutting down...
+[2026-06-15 16:29:45.847] [INFO ] src/reactor.c:279 - Sub-reactor[1] stopped
+[2026-06-15 16:29:45.848] [INFO ] src/reactor.c:279 - Sub-reactor[2] stopped
+[2026-06-15 16:29:45.849] [INFO ] src/reactor.c:279 - Sub-reactor[0] stopped
+[2026-06-15 16:29:45.849] [INFO ] src/reactor.c:279 - Sub-reactor[3] stopped
+[2026-06-15 16:29:49.816] [INFO ] src/heartbeat.c:64 - Heartbeat stopped
+[2026-06-15 16:29:49.816] [INFO ] src/reactor.c:552 - Stopping reactor...
+[2026-06-15 16:29:49.816] [INFO ] src/reactor.c:583 - Reactor stopped
+[2026-06-15 16:29:49.817] [INFO ] src/threadpool.c:111 - Threadpool destroyed
+[2026-06-15 16:29:49.817] [INFO ] src/client.c:28 - Client manager destroyed
+[2026-06-15 16:29:49.817] [INFO ] src/db.c:137 - MySQL connection closed
+[2026-06-15 16:33:13.999] [INFO ] src/main.c:110 - ========================================
+[2026-06-15 16:33:13.999] [INFO ] src/main.c:111 - IM Chat Server starting...
+[2026-06-15 16:33:13.999] [INFO ] src/main.c:112 - Configuration: port=8888, sub_reactors=4, biz_threads=4
+[2026-06-15 16:33:13.999] [INFO ] src/main.c:114 - ========================================
+[2026-06-15 16:33:14.004] [INFO ] src/db.c:48 - MySQL connected: chat_app@localhost:3306
+[2026-06-15 16:33:14.013] [INFO ] src/db.c:74 - Database 'chat_db' selected
+[2026-06-15 16:33:14.014] [INFO ] src/db.c:95 - Users table ready
+[2026-06-15 16:33:14.015] [INFO ] src/db.c:128 - Database initialization complete
+[2026-06-15 16:33:14.015] [INFO ] src/client.c:14 - Client manager initialized
+[2026-06-15 16:33:14.015] [INFO ] src/threadpool.c:81 - Threadpool created with 4 threads
+[2026-06-15 16:33:14.015] [INFO ] src/reactor.c:416 - Listening on port 8888
+[2026-06-15 16:33:14.023] [INFO ] src/reactor.c:503 - Reactor initialized: 4 sub-reactors
+[2026-06-15 16:33:14.023] [INFO ] src/heartbeat.c:54 - Heartbeat started: timeout=3600s, interval=5s
+[2026-06-15 16:33:14.023] [INFO ] src/main.c:157 - Server is ready. Waiting for connections...
+[2026-06-15 16:33:14.023] [INFO ] src/main.c:158 - Press Ctrl+C to stop the server
+[2026-06-15 16:33:14.023] [INFO ] src/reactor.c:228 - Sub-reactor[0] started, epoll_fd=7
+[2026-06-15 16:33:14.023] [INFO ] src/reactor.c:228 - Sub-reactor[2] started, epoll_fd=11
+[2026-06-15 16:33:14.023] [INFO ] src/reactor.c:291 - Main reactor started, listening on port (fd=5)
+[2026-06-15 16:33:14.023] [INFO ] src/reactor.c:228 - Sub-reactor[1] started, epoll_fd=9
+[2026-06-15 16:33:14.023] [INFO ] src/reactor.c:228 - Sub-reactor[3] started, epoll_fd=13
+[2026-06-15 16:34:08.768] [INFO ] src/client.c:70 - Client created: fd=15, ip=10.11.7.213:41584
+[2026-06-15 16:34:08.768] [INFO ] src/reactor.c:357 - Accepted connection: fd=15, ip=10.11.7.213:41584 -> sub[0]
+[2026-06-15 16:34:19.618] [INFO ] src/chat_service.c:161 - Login attempt: user='zhu', pass_len=4
+[2026-06-15 16:34:19.619] [INFO ] src/db.c:236 - User login: zhu (admin=0, status=1)
+[2026-06-15 16:34:19.619] [INFO ] src/chat_service.c:190 - User login: zhu (fd=15, admin=0)
+[2026-06-15 16:34:42.922] [INFO ] src/chat_service.c:410 - Public msg from zhu: 你们好
+[2026-06-15 16:36:24.047] [INFO ] src/client.c:70 - Client created: fd=16, ip=127.0.0.1:33288
+[2026-06-15 16:36:24.048] [INFO ] src/reactor.c:357 - Accepted connection: fd=16, ip=127.0.0.1:33288 -> sub[1]
+[2026-06-15 16:37:12.232] [INFO ] src/reactor.c:256 - fd=16 error/hangup event
+[2026-06-15 16:37:12.232] [INFO ] src/client.c:81 - Client destroyed: fd=16, user=, ip=127.0.0.1:33288
+[2026-06-15 16:38:05.077] [INFO ] src/main.c:20 - Received signal 2, shutting down...
+[2026-06-15 16:38:05.077] [INFO ] src/reactor.c:364 - Main reactor stopped
+[2026-06-15 16:38:05.077] [INFO ] src/main.c:164 - Shutting down...
+[2026-06-15 16:38:05.077] [INFO ] src/reactor.c:279 - Sub-reactor[2] stopped
+[2026-06-15 16:38:05.077] [INFO ] src/reactor.c:279 - Sub-reactor[1] stopped
+[2026-06-15 16:38:05.077] [INFO ] src/reactor.c:279 - Sub-reactor[3] stopped
+[2026-06-15 16:38:05.077] [INFO ] src/reactor.c:279 - Sub-reactor[0] stopped
+[2026-06-15 16:38:09.400] [INFO ] src/heartbeat.c:64 - Heartbeat stopped
+[2026-06-15 16:38:09.401] [INFO ] src/reactor.c:552 - Stopping reactor...
+[2026-06-15 16:38:09.401] [INFO ] src/reactor.c:583 - Reactor stopped
+[2026-06-15 16:38:09.401] [INFO ] src/threadpool.c:111 - Threadpool destroyed
+[2026-06-15 16:38:09.401] [INFO ] src/client.c:81 - Client destroyed: fd=15, user=zhu, ip=10.11.7.213:41584
+[2026-06-15 16:41:52.948] [INFO ] src/main.c:20 - Received signal 2, shutting down...
+[2026-06-15 16:42:16.460] [INFO ] src/main.c:20 - Received signal 2, shutting down...
+[2026-06-15 16:42:16.748] [INFO ] src/main.c:20 - Received signal 2, shutting down...
+[2026-06-15 16:42:16.954] [INFO ] src/main.c:20 - Received signal 2, shutting down...
+[2026-06-15 16:42:17.137] [INFO ] src/main.c:20 - Received signal 2, shutting down...
+[2026-06-15 16:42:17.328] [INFO ] src/main.c:20 - Received signal 2, shutting down...
+[2026-06-15 16:42:17.571] [INFO ] src/main.c:20 - Received signal 2, shutting down...
+[2026-06-15 16:42:52.134] [INFO ] src/main.c:110 - ========================================
+[2026-06-15 16:42:52.134] [INFO ] src/main.c:111 - IM Chat Server starting...
+[2026-06-15 16:42:52.134] [INFO ] src/main.c:112 - Configuration: port=8888, sub_reactors=4, biz_threads=4
+[2026-06-15 16:42:52.134] [INFO ] src/main.c:114 - ========================================
+[2026-06-15 16:42:52.139] [INFO ] src/db.c:48 - MySQL connected: chat_app@localhost:3306
+[2026-06-15 16:42:52.142] [INFO ] src/db.c:74 - Database 'chat_db' selected
+[2026-06-15 16:42:52.143] [INFO ] src/db.c:95 - Users table ready
+[2026-06-15 16:42:52.143] [INFO ] src/db.c:128 - Database initialization complete
+[2026-06-15 16:42:52.143] [INFO ] src/client.c:14 - Client manager initialized
+[2026-06-15 16:42:52.144] [INFO ] src/threadpool.c:81 - Threadpool created with 4 threads
+[2026-06-15 16:42:52.144] [INFO ] src/reactor.c:416 - Listening on port 8888
+[2026-06-15 16:42:52.144] [INFO ] src/reactor.c:503 - Reactor initialized: 4 sub-reactors
+[2026-06-15 16:42:52.144] [INFO ] src/heartbeat.c:54 - Heartbeat started: timeout=3600s, interval=5s
+[2026-06-15 16:42:52.144] [INFO ] src/main.c:157 - Server is ready. Waiting for connections...
+[2026-06-15 16:42:52.144] [INFO ] src/main.c:158 - Press Ctrl+C to stop the server
+[2026-06-15 16:42:52.144] [INFO ] src/reactor.c:228 - Sub-reactor[0] started, epoll_fd=7
+[2026-06-15 16:42:52.144] [INFO ] src/reactor.c:228 - Sub-reactor[1] started, epoll_fd=9
+[2026-06-15 16:42:52.144] [INFO ] src/reactor.c:228 - Sub-reactor[3] started, epoll_fd=13
+[2026-06-15 16:42:52.144] [INFO ] src/reactor.c:291 - Main reactor started, listening on port (fd=5)
+[2026-06-15 16:42:52.144] [INFO ] src/reactor.c:228 - Sub-reactor[2] started, epoll_fd=11
+[2026-06-15 16:44:31.857] [INFO ] src/client.c:70 - Client created: fd=15, ip=127.0.0.1:38748
+[2026-06-15 16:44:31.857] [INFO ] src/reactor.c:357 - Accepted connection: fd=15, ip=127.0.0.1:38748 -> sub[0]
+[2026-06-15 16:44:49.691] [INFO ] src/db.c:168 - User registered: qhl
+[2026-06-15 16:44:49.691] [INFO ] src/chat_service.c:292 - User registered: qhl
+[2026-06-15 16:45:05.502] [INFO ] src/chat_service.c:161 - Login attempt: user='qhl', pass_len=3
+[2026-06-15 16:45:05.503] [INFO ] src/db.c:236 - User login: qhl (admin=0, status=1)
+[2026-06-15 16:45:05.503] [INFO ] src/chat_service.c:190 - User login: qhl (fd=15, admin=0)
+[2026-06-15 16:46:40.972] [INFO ] src/client.c:70 - Client created: fd=16, ip=10.11.7.213:43114
+[2026-06-15 16:46:40.972] [INFO ] src/reactor.c:357 - Accepted connection: fd=16, ip=10.11.7.213:43114 -> sub[1]
+[2026-06-15 16:47:09.618] [INFO ] src/client.c:70 - Client created: fd=18, ip=10.11.7.214:59254
+[2026-06-15 16:47:09.618] [INFO ] src/reactor.c:357 - Accepted connection: fd=18, ip=10.11.7.214:59254 -> sub[2]
+[2026-06-15 16:48:05.833] [INFO ] src/chat_service.c:161 - Login attempt: user='zhu', pass_len=4
+[2026-06-15 16:48:05.833] [INFO ] src/db.c:236 - User login: zhu (admin=0, status=1)
+[2026-06-15 16:48:05.833] [INFO ] src/chat_service.c:190 - User login: zhu (fd=16, admin=0)
+[2026-06-15 16:48:31.774] [INFO ] src/db.c:168 - User registered: dong666
+[2026-06-15 16:48:31.774] [INFO ] src/chat_service.c:292 - User registered: dong666
+[2026-06-15 16:48:54.235] [INFO ] src/chat_service.c:161 - Login attempt: user='dong666', pass_len=4
+[2026-06-15 16:48:54.236] [INFO ] src/db.c:236 - User login: dong666 (admin=0, status=1)
+[2026-06-15 16:48:54.236] [INFO ] src/chat_service.c:190 - User login: dong666 (fd=18, admin=0)
+[2026-06-15 16:50:20.477] [INFO ] src/client.c:70 - Client created: fd=19, ip=10.11.7.106:43392
+[2026-06-15 16:50:20.477] [INFO ] src/reactor.c:357 - Accepted connection: fd=19, ip=10.11.7.106:43392 -> sub[3]
+[2026-06-15 16:50:31.546] [INFO ] src/db.c:168 - User registered: z
+[2026-06-15 16:50:31.546] [INFO ] src/chat_service.c:292 - User registered: z
+[2026-06-15 16:50:41.062] [INFO ] src/reactor.c:256 - fd=18 error/hangup event
+[2026-06-15 16:50:41.062] [INFO ] src/client.c:81 - Client destroyed: fd=18, user=dong666, ip=10.11.7.214:59254
+[2026-06-15 16:50:42.650] [INFO ] src/chat_service.c:161 - Login attempt: user='z', pass_len=3
+[2026-06-15 16:50:42.650] [INFO ] src/db.c:236 - User login: z (admin=0, status=1)
+[2026-06-15 16:50:42.650] [INFO ] src/chat_service.c:190 - User login: z (fd=19, admin=0)
+[2026-06-15 16:50:48.561] [INFO ] src/client.c:70 - Client created: fd=18, ip=10.11.7.214:40620
+[2026-06-15 16:50:48.561] [INFO ] src/reactor.c:357 - Accepted connection: fd=18, ip=10.11.7.214:40620 -> sub[0]
+[2026-06-15 16:51:09.180] [INFO ] src/chat_service.c:161 - Login attempt: user='dong666', pass_len=4
+[2026-06-15 16:51:09.181] [INFO ] src/db.c:236 - User login: dong666 (admin=0, status=1)
+[2026-06-15 16:51:09.181] [INFO ] src/chat_service.c:190 - User login: dong666 (fd=18, admin=0)
+[2026-06-15 16:51:15.776] [INFO ] src/chat_service.c:410 - Public msg from zhu: nik
+[2026-06-15 16:51:23.740] [INFO ] src/chat_service.c:410 - Public msg from dong666: 666
+[2026-06-15 16:51:40.062] [INFO ] src/chat_service.c:410 - Public msg from zhu: /qhl 666
+[2026-06-15 16:51:49.256] [INFO ] src/chat_service.c:410 - Public msg from qhl: ]\
+[2026-06-15 16:51:56.453] [INFO ] src/chat_service.c:410 - Public msg from z: /t
+[2026-06-15 16:52:46.399] [INFO ] src/chat_service.c:410 - Public msg from z: 123
+[2026-06-15 16:53:27.612] [INFO ] src/reactor.c:256 - fd=16 error/hangup event
+[2026-06-15 16:53:27.614] [INFO ] src/client.c:81 - Client destroyed: fd=16, user=zhu, ip=10.11.7.213:43114
+[2026-06-15 16:53:31.785] [INFO ] src/client.c:70 - Client created: fd=16, ip=10.11.7.213:38076
+[2026-06-15 16:53:31.788] [INFO ] src/reactor.c:357 - Accepted connection: fd=16, ip=10.11.7.213:38076 -> sub[1]
+[2026-06-15 16:53:51.545] [INFO ] src/reactor.c:256 - fd=19 error/hangup event
+[2026-06-15 16:53:51.545] [INFO ] src/client.c:81 - Client destroyed: fd=19, user=z, ip=10.11.7.106:43392
+[2026-06-15 16:53:54.479] [INFO ] src/client.c:70 - Client created: fd=19, ip=10.11.7.106:46556
+[2026-06-15 16:53:54.479] [INFO ] src/reactor.c:357 - Accepted connection: fd=19, ip=10.11.7.106:46556 -> sub[2]
+[2026-06-15 16:53:59.173] [INFO ] src/chat_service.c:161 - Login attempt: user='admin', pass_len=8
+[2026-06-15 16:53:59.174] [INFO ] src/db.c:236 - User login: admin (admin=1, status=1)
+[2026-06-15 16:53:59.174] [INFO ] src/chat_service.c:190 - User login: admin (fd=16, admin=1)
+[2026-06-15 16:54:04.047] [INFO ] src/chat_service.c:161 - Login attempt: user='z', pass_len=3
+[2026-06-15 16:54:04.048] [INFO ] src/db.c:236 - User login: z (admin=0, status=1)
+[2026-06-15 16:54:04.048] [INFO ] src/chat_service.c:190 - User login: z (fd=19, admin=0)
+[2026-06-15 16:54:09.887] [INFO ] src/chat_service.c:369 - Admin 'admin' kicked user 'z'
+[2026-06-15 16:54:09.887] [INFO ] src/client.c:81 - Client destroyed: fd=19, user=z, ip=10.11.7.106:46556
+[2026-06-15 16:54:24.070] [INFO ] src/client.c:70 - Client created: fd=19, ip=10.11.7.106:48200
+[2026-06-15 16:54:24.070] [INFO ] src/reactor.c:357 - Accepted connection: fd=19, ip=10.11.7.106:48200 -> sub[3]
+[2026-06-15 16:54:53.349] [INFO ] src/reactor.c:256 - fd=19 error/hangup event
+[2026-06-15 16:54:53.349] [INFO ] src/client.c:81 - Client destroyed: fd=19, user=, ip=10.11.7.106:48200
+[2026-06-15 16:54:54.396] [INFO ] src/client.c:70 - Client created: fd=19, ip=10.11.7.106:56398
+[2026-06-15 16:54:54.396] [INFO ] src/reactor.c:357 - Accepted connection: fd=19, ip=10.11.7.106:56398 -> sub[0]
+[2026-06-15 16:55:05.863] [INFO ] src/chat_service.c:161 - Login attempt: user='z', pass_len=3
+[2026-06-15 16:55:05.864] [WARN ] src/db.c:200 - Login query returned no rows, sql: SELECT id, is_admin, status FROM users WHERE username = 'z' AND password_hash = SHA2(CONCAT('z', ':', '666'), 256)
+[2026-06-15 16:55:07.320] [INFO ] src/chat_service.c:410 - Public msg from dong666: giao
+[2026-06-15 16:55:12.336] [INFO ] src/chat_service.c:410 - Public msg from admin: /kick
+[2026-06-15 16:55:33.161] [INFO ] src/reactor.c:256 - fd=19 error/hangup event
+[2026-06-15 16:55:33.161] [INFO ] src/client.c:81 - Client destroyed: fd=19, user=, ip=10.11.7.106:56398
+[2026-06-15 16:55:41.797] [INFO ] src/client.c:70 - Client created: fd=19, ip=10.11.7.106:49196
+[2026-06-15 16:55:41.797] [INFO ] src/reactor.c:357 - Accepted connection: fd=19, ip=10.11.7.106:49196 -> sub[1]
+[2026-06-15 16:55:47.226] [INFO ] src/reactor.c:256 - fd=15 error/hangup event
+[2026-06-15 16:55:47.226] [INFO ] src/client.c:81 - Client destroyed: fd=15, user=qhl, ip=127.0.0.1:38748
+[2026-06-15 16:55:48.713] [INFO ] src/client.c:70 - Client created: fd=15, ip=127.0.0.1:36702
+[2026-06-15 16:55:48.713] [INFO ] src/reactor.c:357 - Accepted connection: fd=15, ip=127.0.0.1:36702 -> sub[2]
+[2026-06-15 16:55:54.404] [INFO ] src/chat_service.c:410 - Public msg from admin: /
+[2026-06-15 16:56:47.834] [INFO ] src/db.c:168 - User registered: y
+[2026-06-15 16:56:47.834] [INFO ] src/chat_service.c:292 - User registered: y
+[2026-06-15 16:57:06.458] [INFO ] src/chat_service.c:161 - Login attempt: user='z', pass_len=3
+[2026-06-15 16:57:06.459] [WARN ] src/db.c:200 - Login query returned no rows, sql: SELECT id, is_admin, status FROM users WHERE username = 'z' AND password_hash = SHA2(CONCAT('z', ':', '555'), 256)
+[2026-06-15 16:57:12.211] [INFO ] src/reactor.c:256 - fd=19 error/hangup event
+[2026-06-15 16:57:12.211] [INFO ] src/client.c:81 - Client destroyed: fd=19, user=, ip=10.11.7.106:49196
+[2026-06-15 16:57:14.878] [INFO ] src/client.c:70 - Client created: fd=19, ip=10.11.7.106:40410
+[2026-06-15 16:57:14.878] [INFO ] src/reactor.c:357 - Accepted connection: fd=19, ip=10.11.7.106:40410 -> sub[3]
+[2026-06-15 16:57:27.591] [INFO ] src/main.c:20 - Received signal 2, shutting down...
+[2026-06-15 16:57:27.597] [INFO ] src/reactor.c:364 - Main reactor stopped
+[2026-06-15 16:57:27.598] [INFO ] src/main.c:164 - Shutting down...
+[2026-06-15 16:57:27.598] [INFO ] src/reactor.c:279 - Sub-reactor[2] stopped
+[2026-06-15 16:57:27.598] [INFO ] src/reactor.c:279 - Sub-reactor[0] stopped
+[2026-06-15 16:57:27.598] [INFO ] src/reactor.c:279 - Sub-reactor[1] stopped
+[2026-06-15 16:57:27.598] [INFO ] src/reactor.c:279 - Sub-reactor[3] stopped
+[2026-06-15 16:57:28.290] [INFO ] src/heartbeat.c:64 - Heartbeat stopped
+[2026-06-15 16:57:28.290] [INFO ] src/reactor.c:552 - Stopping reactor...
+[2026-06-15 16:57:28.290] [INFO ] src/reactor.c:583 - Reactor stopped
+[2026-06-15 16:57:28.291] [INFO ] src/threadpool.c:111 - Threadpool destroyed
+[2026-06-15 16:57:28.291] [INFO ] src/client.c:81 - Client destroyed: fd=15, user=, ip=127.0.0.1:36702
+[2026-06-15 16:57:30.524] [INFO ] src/main.c:20 - Received signal 2, shutting down...
+[2026-06-15 16:57:30.986] [INFO ] src/main.c:20 - Received signal 2, shutting down...
+[2026-06-15 16:57:31.266] [INFO ] src/main.c:20 - Received signal 2, shutting down...
+[2026-06-15 16:57:40.920] [INFO ] src/main.c:110 - ========================================
+[2026-06-15 16:57:40.920] [INFO ] src/main.c:111 - IM Chat Server starting...
+[2026-06-15 16:57:40.920] [INFO ] src/main.c:112 - Configuration: port=8888, sub_reactors=4, biz_threads=4
+[2026-06-15 16:57:40.920] [INFO ] src/main.c:114 - ========================================
+[2026-06-15 16:57:40.925] [INFO ] src/db.c:48 - MySQL connected: chat_app@localhost:3306
+[2026-06-15 16:57:40.928] [INFO ] src/db.c:74 - Database 'chat_db' selected
+[2026-06-15 16:57:40.929] [INFO ] src/db.c:95 - Users table ready
+[2026-06-15 16:57:40.931] [INFO ] src/db.c:128 - Database initialization complete
+[2026-06-15 16:57:40.931] [INFO ] src/client.c:14 - Client manager initialized
+[2026-06-15 16:57:40.931] [INFO ] src/threadpool.c:81 - Threadpool created with 4 threads
+[2026-06-15 16:57:40.931] [INFO ] src/reactor.c:416 - Listening on port 8888
+[2026-06-15 16:57:40.931] [INFO ] src/reactor.c:503 - Reactor initialized: 4 sub-reactors
+[2026-06-15 16:57:40.931] [INFO ] src/heartbeat.c:54 - Heartbeat started: timeout=3600s, interval=5s
+[2026-06-15 16:57:40.931] [INFO ] src/main.c:157 - Server is ready. Waiting for connections...
+[2026-06-15 16:57:40.931] [INFO ] src/main.c:158 - Press Ctrl+C to stop the server
+[2026-06-15 16:57:40.932] [INFO ] src/reactor.c:291 - Main reactor started, listening on port (fd=5)
+[2026-06-15 16:57:40.933] [INFO ] src/reactor.c:228 - Sub-reactor[0] started, epoll_fd=7
+[2026-06-15 16:57:40.933] [INFO ] src/reactor.c:228 - Sub-reactor[2] started, epoll_fd=11
+[2026-06-15 16:57:40.933] [INFO ] src/reactor.c:228 - Sub-reactor[1] started, epoll_fd=9
+[2026-06-15 16:57:40.933] [INFO ] src/reactor.c:228 - Sub-reactor[3] started, epoll_fd=13
+[2026-06-15 16:58:06.388] [INFO ] src/client.c:70 - Client created: fd=15, ip=127.0.0.1:56282
+[2026-06-15 16:58:06.388] [INFO ] src/reactor.c:357 - Accepted connection: fd=15, ip=127.0.0.1:56282 -> sub[0]
+[2026-06-15 16:58:16.668] [INFO ] src/client.c:70 - Client created: fd=16, ip=10.11.7.213:46210
+[2026-06-15 16:58:16.668] [INFO ] src/reactor.c:357 - Accepted connection: fd=16, ip=10.11.7.213:46210 -> sub[1]
+[2026-06-15 16:58:28.413] [INFO ] src/chat_service.c:161 - Login attempt: user='zhu', pass_len=4
+[2026-06-15 16:58:28.413] [INFO ] src/db.c:236 - User login: zhu (admin=0, status=1)
+[2026-06-15 16:58:28.413] [INFO ] src/chat_service.c:190 - User login: zhu (fd=16, admin=0)
+[2026-06-15 16:58:36.458] [INFO ] src/chat_service.c:161 - Login attempt: user='qhl', pass_len=3
+[2026-06-15 16:58:36.458] [INFO ] src/db.c:236 - User login: qhl (admin=0, status=1)
+[2026-06-15 16:58:36.458] [INFO ] src/chat_service.c:190 - User login: qhl (fd=15, admin=0)
+[2026-06-15 16:58:45.741] [INFO ] src/chat_service.c:457 - [DEBUG] private body: [{"to":"zhu","msg":"111111111111111111111111111"}] len=48
+[2026-06-15 16:58:45.741] [INFO ] src/chat_service.c:459 - [DEBUG] to_start=0x7f1edfb3bdd1 body=0x7f1edfb3bdd0
+[2026-06-15 16:59:02.885] [INFO ] src/chat_service.c:457 - [DEBUG] private body: [{"to":"zhu","msg":"11111"}] len=26
+[2026-06-15 16:59:02.885] [INFO ] src/chat_service.c:459 - [DEBUG] to_start=0x7f1ee0b3ddd1 body=0x7f1ee0b3ddd0
+[2026-06-15 17:00:27.908] [INFO ] src/reactor.c:256 - fd=16 error/hangup event
+[2026-06-15 17:00:27.908] [INFO ] src/client.c:81 - Client destroyed: fd=16, user=zhu, ip=10.11.7.213:46210
+[2026-06-15 17:02:20.116] [INFO ] src/client.c:70 - Client created: fd=16, ip=10.11.7.213:53770
+[2026-06-15 17:02:20.116] [INFO ] src/reactor.c:357 - Accepted connection: fd=16, ip=10.11.7.213:53770 -> sub[2]
+[2026-06-15 17:02:33.120] [INFO ] src/chat_service.c:161 - Login attempt: user='zhu', pass_len=4
+[2026-06-15 17:02:33.121] [INFO ] src/db.c:236 - User login: zhu (admin=0, status=1)
+[2026-06-15 17:02:33.121] [INFO ] src/chat_service.c:190 - User login: zhu (fd=16, admin=0)
+[2026-06-15 17:03:04.104] [INFO ] src/chat_service.c:410 - Public msg from qhl: to zhu 222
+[2026-06-15 17:04:40.758] [INFO ] src/client.c:70 - Client created: fd=18, ip=10.11.7.214:57460
+[2026-06-15 17:04:40.758] [INFO ] src/reactor.c:357 - Accepted connection: fd=18, ip=10.11.7.214:57460 -> sub[3]
+[2026-06-15 17:04:59.533] [INFO ] src/chat_service.c:161 - Login attempt: user='dong666', pass_len=4
+[2026-06-15 17:04:59.534] [INFO ] src/db.c:236 - User login: dong666 (admin=0, status=1)
+[2026-06-15 17:04:59.534] [INFO ] src/chat_service.c:190 - User login: dong666 (fd=18, admin=0)
+[2026-06-15 17:05:03.152] [INFO ] src/chat_service.c:457 - [DEBUG] private body: [{"to":"zhu","msg":"111"}] len=24
+[2026-06-15 17:05:03.152] [INFO ] src/chat_service.c:459 - [DEBUG] to_start=0x7f1ee0b3ddd1 body=0x7f1ee0b3ddd0
+[2026-06-15 17:05:11.834] [INFO ] src/chat_service.c:457 - [DEBUG] private body: [{"to":"zhu","msg":"1111"}] len=25
+[2026-06-15 17:05:11.834] [INFO ] src/chat_service.c:459 - [DEBUG] to_start=0x7f1edfb3bdd1 body=0x7f1edfb3bdd0
+[2026-06-15 17:06:33.609] [INFO ] src/main.c:110 - ========================================
+[2026-06-15 17:06:33.609] [INFO ] src/main.c:111 - IM Chat Server starting...
+[2026-06-15 17:06:33.609] [INFO ] src/main.c:112 - Configuration: port=8888, sub_reactors=4, biz_threads=4
+[2026-06-15 17:06:33.609] [INFO ] src/main.c:114 - ========================================
+[2026-06-15 17:06:33.612] [INFO ] src/db.c:48 - MySQL connected: chat_app@localhost:3306
+[2026-06-15 17:06:33.617] [INFO ] src/db.c:74 - Database 'chat_db' selected
+[2026-06-15 17:06:33.624] [INFO ] src/db.c:95 - Users table ready
+[2026-06-15 17:06:33.625] [INFO ] src/db.c:128 - Database initialization complete
+[2026-06-15 17:06:33.625] [INFO ] src/client.c:14 - Client manager initialized
+[2026-06-15 17:06:33.625] [INFO ] src/threadpool.c:81 - Threadpool created with 4 threads
+[2026-06-15 17:06:33.625] [INFO ] src/reactor.c:416 - Listening on port 8888
+[2026-06-15 17:06:33.625] [INFO ] src/reactor.c:503 - Reactor initialized: 4 sub-reactors
+[2026-06-15 17:06:33.625] [INFO ] src/heartbeat.c:54 - Heartbeat started: timeout=3600s, interval=5s
+[2026-06-15 17:06:33.625] [INFO ] src/main.c:157 - Server is ready. Waiting for connections...
+[2026-06-15 17:06:33.625] [INFO ] src/main.c:158 - Press Ctrl+C to stop the server
+[2026-06-15 17:06:33.625] [INFO ] src/reactor.c:228 - Sub-reactor[1] started, epoll_fd=9
+[2026-06-15 17:06:33.625] [INFO ] src/reactor.c:228 - Sub-reactor[3] started, epoll_fd=13
+[2026-06-15 17:06:33.625] [INFO ] src/reactor.c:228 - Sub-reactor[2] started, epoll_fd=11
+[2026-06-15 17:06:33.625] [INFO ] src/reactor.c:228 - Sub-reactor[0] started, epoll_fd=7
+[2026-06-15 17:06:33.625] [INFO ] src/reactor.c:291 - Main reactor started, listening on port (fd=5)
+[2026-06-15 17:06:42.772] [INFO ] src/client.c:70 - Client created: fd=15, ip=127.0.0.1:54272
+[2026-06-15 17:06:42.772] [INFO ] src/reactor.c:357 - Accepted connection: fd=15, ip=127.0.0.1:54272 -> sub[0]
+[2026-06-15 17:06:53.583] [INFO ] src/client.c:70 - Client created: fd=16, ip=10.11.7.213:38836
+[2026-06-15 17:06:53.585] [INFO ] src/reactor.c:357 - Accepted connection: fd=16, ip=10.11.7.213:38836 -> sub[1]
+[2026-06-15 17:06:54.755] [INFO ] src/chat_service.c:161 - Login attempt: user='qhl', pass_len=3
+[2026-06-15 17:06:54.756] [INFO ] src/db.c:236 - User login: qhl (admin=0, status=1)
+[2026-06-15 17:06:54.756] [INFO ] src/chat_service.c:190 - User login: qhl (fd=15, admin=0)
+[2026-06-15 17:06:56.963] [INFO ] src/client.c:70 - Client created: fd=18, ip=10.11.7.214:41356
+[2026-06-15 17:06:56.963] [INFO ] src/reactor.c:357 - Accepted connection: fd=18, ip=10.11.7.214:41356 -> sub[2]
+[2026-06-15 17:07:03.720] [INFO ] src/chat_service.c:161 - Login attempt: user='zhu', pass_len=4
+[2026-06-15 17:07:03.721] [INFO ] src/db.c:236 - User login: zhu (admin=0, status=1)
+[2026-06-15 17:07:03.721] [INFO ] src/chat_service.c:190 - User login: zhu (fd=16, admin=0)
+[2026-06-15 17:07:08.831] [INFO ] src/chat_service.c:161 - Login attempt: user='dong666', pass_len=4
+[2026-06-15 17:07:08.832] [INFO ] src/db.c:236 - User login: dong666 (admin=0, status=1)
+[2026-06-15 17:07:08.832] [INFO ] src/chat_service.c:190 - User login: dong666 (fd=18, admin=0)
+[2026-06-15 17:07:10.049] [INFO ] src/chat_service.c:410 - Public msg from zhu: /
+[2026-06-15 17:07:13.063] [INFO ] src/chat_service.c:410 - Public msg from qhl:  /to zhu hello
+[2026-06-15 17:07:19.709] [INFO ] src/chat_service.c:410 - Public msg from qhl:  /to zhu hello
+[2026-06-15 17:07:23.690] [INFO ] src/chat_service.c:410 - Public msg from zhu: /
+[2026-06-15 17:12:33.295] [INFO ] src/main.c:20 - Received signal 2, shutting down...
+[2026-06-15 17:12:33.295] [INFO ] src/reactor.c:364 - Main reactor stopped
+[2026-06-15 17:12:33.295] [INFO ] src/main.c:164 - Shutting down...
+[2026-06-15 17:12:33.295] [INFO ] src/reactor.c:279 - Sub-reactor[0] stopped
+[2026-06-15 17:12:33.295] [INFO ] src/reactor.c:279 - Sub-reactor[2] stopped
+[2026-06-15 17:12:33.296] [INFO ] src/reactor.c:279 - Sub-reactor[3] stopped
+[2026-06-15 17:12:33.296] [INFO ] src/reactor.c:279 - Sub-reactor[1] stopped
+[2026-06-15 17:12:33.953] [INFO ] src/heartbeat.c:64 - Heartbeat stopped
+[2026-06-15 17:12:33.953] [INFO ] src/reactor.c:552 - Stopping reactor...
+[2026-06-15 17:12:33.953] [INFO ] src/reactor.c:583 - Reactor stopped
+[2026-06-15 17:12:33.954] [INFO ] src/threadpool.c:111 - Threadpool destroyed
+[2026-06-15 17:12:33.954] [INFO ] src/client.c:81 - Client destroyed: fd=15, user=qhl, ip=127.0.0.1:54272
+[2026-06-15 17:12:45.959] [INFO ] src/main.c:110 - ========================================
+[2026-06-15 17:12:45.960] [INFO ] src/main.c:111 - IM Chat Server starting...
+[2026-06-15 17:12:45.960] [INFO ] src/main.c:112 - Configuration: port=8888, sub_reactors=4, biz_threads=4
+[2026-06-15 17:12:45.960] [INFO ] src/main.c:114 - ========================================
+[2026-06-15 17:12:45.964] [INFO ] src/db.c:48 - MySQL connected: chat_app@localhost:3306
+[2026-06-15 17:12:45.966] [INFO ] src/db.c:74 - Database 'chat_db' selected
+[2026-06-15 17:12:45.967] [INFO ] src/db.c:95 - Users table ready
+[2026-06-15 17:12:45.968] [INFO ] src/db.c:128 - Database initialization complete
+[2026-06-15 17:12:45.968] [INFO ] src/client.c:14 - Client manager initialized
+[2026-06-15 17:12:45.968] [INFO ] src/threadpool.c:81 - Threadpool created with 4 threads
+[2026-06-15 17:12:45.968] [INFO ] src/reactor.c:416 - Listening on port 8888
+[2026-06-15 17:12:45.968] [INFO ] src/reactor.c:503 - Reactor initialized: 4 sub-reactors
+[2026-06-15 17:12:45.968] [INFO ] src/heartbeat.c:54 - Heartbeat started: timeout=3600s, interval=5s
+[2026-06-15 17:12:45.968] [INFO ] src/main.c:157 - Server is ready. Waiting for connections...
+[2026-06-15 17:12:45.968] [INFO ] src/main.c:158 - Press Ctrl+C to stop the server
+[2026-06-15 17:12:45.968] [INFO ] src/reactor.c:291 - Main reactor started, listening on port (fd=5)
+[2026-06-15 17:12:45.968] [INFO ] src/reactor.c:228 - Sub-reactor[0] started, epoll_fd=7
+[2026-06-15 17:12:45.968] [INFO ] src/reactor.c:228 - Sub-reactor[1] started, epoll_fd=9
+[2026-06-15 17:12:45.968] [INFO ] src/reactor.c:228 - Sub-reactor[2] started, epoll_fd=11
+[2026-06-15 17:12:45.968] [INFO ] src/reactor.c:228 - Sub-reactor[3] started, epoll_fd=13
+[2026-06-15 17:15:11.341] [INFO ] src/client.c:70 - Client created: fd=15, ip=10.11.7.213:59300
+[2026-06-15 17:15:11.341] [INFO ] src/reactor.c:357 - Accepted connection: fd=15, ip=10.11.7.213:59300 -> sub[0]
+[2026-06-15 17:15:18.268] [INFO ] src/chat_service.c:161 - Login attempt: user='zhu', pass_len=4
+[2026-06-15 17:15:18.269] [INFO ] src/db.c:236 - User login: zhu (admin=0, status=1)
+[2026-06-15 17:15:18.269] [INFO ] src/chat_service.c:190 - User login: zhu (fd=15, admin=0)
+[2026-06-15 17:15:47.987] [INFO ] src/client.c:70 - Client created: fd=16, ip=127.0.0.1:35958
+[2026-06-15 17:15:47.987] [INFO ] src/reactor.c:357 - Accepted connection: fd=16, ip=127.0.0.1:35958 -> sub[1]
+[2026-06-15 17:15:56.109] [INFO ] src/chat_service.c:161 - Login attempt: user='qhl', pass_len=3
+[2026-06-15 17:15:56.109] [INFO ] src/db.c:236 - User login: qhl (admin=0, status=1)
+[2026-06-15 17:15:56.109] [INFO ] src/chat_service.c:190 - User login: qhl (fd=16, admin=0)
+[2026-06-15 17:16:08.676] [INFO ] src/client.c:70 - Client created: fd=18, ip=10.11.7.214:42454
+[2026-06-15 17:16:08.676] [INFO ] src/reactor.c:357 - Accepted connection: fd=18, ip=10.11.7.214:42454 -> sub[2]
+[2026-06-15 17:16:19.057] [INFO ] src/chat_service.c:161 - Login attempt: user='dong666', pass_len=4
+[2026-06-15 17:16:19.057] [INFO ] src/db.c:236 - User login: dong666 (admin=0, status=1)
+[2026-06-15 17:16:19.057] [INFO ] src/chat_service.c:190 - User login: dong666 (fd=18, admin=0)
+[2026-06-15 17:16:21.127] [INFO ] src/chat_service.c:457 - [DEBUG] private body: [{"to":"zhu","msg":"123"}] len=24
+[2026-06-15 17:16:21.127] [INFO ] src/chat_service.c:459 - [DEBUG] to_start=0x7f2c95f7ddd1 body=0x7f2c95f7ddd0
+[2026-06-15 17:16:21.127] [INFO ] src/chat_service.c:493 - [DEBUG] target_name=[{"to"] msg_content=["zhu]
+[2026-06-15 17:17:56.531] [INFO ] src/main.c:20 - Received signal 15, shutting down...
+[2026-06-15 17:17:56.531] [INFO ] src/reactor.c:364 - Main reactor stopped
+[2026-06-15 17:17:56.531] [INFO ] src/main.c:164 - Shutting down...
+[2026-06-15 17:17:56.531] [INFO ] src/reactor.c:279 - Sub-reactor[1] stopped
+[2026-06-15 17:17:56.531] [INFO ] src/reactor.c:279 - Sub-reactor[0] stopped
+[2026-06-15 17:17:56.531] [INFO ] src/reactor.c:279 - Sub-reactor[2] stopped
+[2026-06-15 17:17:56.531] [INFO ] src/reactor.c:279 - Sub-reactor[3] stopped
+[2026-06-15 17:18:01.292] [INFO ] src/heartbeat.c:64 - Heartbeat stopped
+[2026-06-15 17:18:01.292] [INFO ] src/reactor.c:552 - Stopping reactor...
+[2026-06-15 17:18:01.292] [INFO ] src/reactor.c:583 - Reactor stopped
+[2026-06-15 17:18:01.293] [INFO ] src/threadpool.c:111 - Threadpool destroyed
+[2026-06-15 17:18:01.293] [INFO ] src/client.c:81 - Client destroyed: fd=15, user=zhu, ip=10.11.7.213:59300
+[2026-06-15 17:18:18.051] [INFO ] src/main.c:20 - Received signal 2, shutting down...
+[2026-06-15 17:18:32.765] [INFO ] src/main.c:110 - ========================================
+[2026-06-15 17:18:32.765] [INFO ] src/main.c:111 - IM Chat Server starting...
+[2026-06-15 17:18:32.765] [INFO ] src/main.c:112 - Configuration: port=8888, sub_reactors=4, biz_threads=4
+[2026-06-15 17:18:32.765] [INFO ] src/main.c:114 - ========================================
+[2026-06-15 17:18:32.787] [INFO ] src/db.c:48 - MySQL connected: chat_app@localhost:3306
+[2026-06-15 17:18:32.790] [INFO ] src/db.c:74 - Database 'chat_db' selected
+[2026-06-15 17:18:32.794] [INFO ] src/db.c:95 - Users table ready
+[2026-06-15 17:18:32.794] [INFO ] src/db.c:128 - Database initialization complete
+[2026-06-15 17:18:32.795] [INFO ] src/client.c:14 - Client manager initialized
+[2026-06-15 17:18:32.795] [INFO ] src/threadpool.c:81 - Threadpool created with 4 threads
+[2026-06-15 17:18:32.795] [INFO ] src/reactor.c:416 - Listening on port 8888
+[2026-06-15 17:18:32.795] [INFO ] src/reactor.c:503 - Reactor initialized: 4 sub-reactors
+[2026-06-15 17:18:32.795] [INFO ] src/heartbeat.c:54 - Heartbeat started: timeout=3600s, interval=5s
+[2026-06-15 17:18:32.795] [INFO ] src/main.c:157 - Server is ready. Waiting for connections...
+[2026-06-15 17:18:32.795] [INFO ] src/main.c:158 - Press Ctrl+C to stop the server
+[2026-06-15 17:18:32.795] [INFO ] src/reactor.c:228 - Sub-reactor[0] started, epoll_fd=7
+[2026-06-15 17:18:32.795] [INFO ] src/reactor.c:228 - Sub-reactor[1] started, epoll_fd=9
+[2026-06-15 17:18:32.795] [INFO ] src/reactor.c:228 - Sub-reactor[3] started, epoll_fd=13
+[2026-06-15 17:18:32.795] [INFO ] src/reactor.c:291 - Main reactor started, listening on port (fd=5)
+[2026-06-15 17:18:32.795] [INFO ] src/reactor.c:228 - Sub-reactor[2] started, epoll_fd=11
+[2026-06-15 17:18:36.636] [INFO ] src/client.c:70 - Client created: fd=15, ip=10.11.7.214:33896
+[2026-06-15 17:18:36.636] [INFO ] src/reactor.c:357 - Accepted connection: fd=15, ip=10.11.7.214:33896 -> sub[0]
+[2026-06-15 17:18:45.054] [INFO ] src/client.c:70 - Client created: fd=16, ip=10.11.7.213:50066
+[2026-06-15 17:18:45.054] [INFO ] src/reactor.c:357 - Accepted connection: fd=16, ip=10.11.7.213:50066 -> sub[1]
+[2026-06-15 17:18:49.284] [INFO ] src/chat_service.c:161 - Login attempt: user='dong666', pass_len=4
+[2026-06-15 17:18:49.285] [INFO ] src/db.c:236 - User login: dong666 (admin=0, status=1)
+[2026-06-15 17:18:49.285] [INFO ] src/chat_service.c:190 - User login: dong666 (fd=15, admin=0)
+[2026-06-15 17:18:50.389] [INFO ] src/chat_service.c:161 - Login attempt: user='zhu', pass_len=4
+[2026-06-15 17:18:50.393] [INFO ] src/db.c:236 - User login: zhu (admin=0, status=1)
+[2026-06-15 17:18:50.393] [INFO ] src/chat_service.c:190 - User login: zhu (fd=16, admin=0)
+[2026-06-15 17:18:56.750] [INFO ] src/chat_service.c:410 - Public msg from dong666: 66.
+[2026-06-15 17:19:00.496] [INFO ] src/client.c:70 - Client created: fd=18, ip=127.0.0.1:50164
+[2026-06-15 17:19:00.496] [INFO ] src/reactor.c:357 - Accepted connection: fd=18, ip=127.0.0.1:50164 -> sub[2]
+[2026-06-15 17:19:01.063] [INFO ] src/chat_service.c:410 - Public msg from dong666: 6
+[2026-06-15 17:19:01.472] [INFO ] src/chat_service.c:410 - Public msg from dong666: 6
+[2026-06-15 17:19:01.678] [INFO ] src/chat_service.c:410 - Public msg from dong666: 6
+[2026-06-15 17:19:01.832] [INFO ] src/chat_service.c:410 - Public msg from dong666: 6
+[2026-06-15 17:19:01.988] [INFO ] src/chat_service.c:410 - Public msg from dong666: 6
+[2026-06-15 17:19:03.049] [INFO ] src/chat_service.c:410 - Public msg from dong666: 6
+[2026-06-15 17:19:07.236] [INFO ] src/chat_service.c:161 - Login attempt: user='qhl', pass_len=3
+[2026-06-15 17:19:07.236] [INFO ] src/db.c:236 - User login: qhl (admin=0, status=1)
+[2026-06-15 17:19:07.236] [INFO ] src/chat_service.c:190 - User login: qhl (fd=18, admin=0)
+[2026-06-15 17:19:14.372] [INFO ] src/chat_service.c:410 - Public msg from dong666: 6
+[2026-06-15 17:19:14.515] [INFO ] src/chat_service.c:410 - Public msg from dong666: 6
+[2026-06-15 17:19:14.687] [INFO ] src/chat_service.c:410 - Public msg from dong666: 6
+[2026-06-15 17:19:14.849] [INFO ] src/chat_service.c:410 - Public msg from dong666: 6
+[2026-06-15 17:19:15.013] [INFO ] src/chat_service.c:410 - Public msg from dong666: 6
+[2026-06-15 17:19:15.165] [INFO ] src/chat_service.c:410 - Public msg from dong666: 6
+[2026-06-15 17:19:15.328] [INFO ] src/chat_service.c:410 - Public msg from dong666: 6
+[2026-06-15 17:19:15.503] [INFO ] src/chat_service.c:410 - Public msg from dong666: 6
+[2026-06-15 17:19:15.661] [INFO ] src/chat_service.c:410 - Public msg from dong666: 6
+[2026-06-15 17:19:25.611] [INFO ] src/chat_service.c:457 - [DEBUG] private body: [{"to":"zhu","msg":"hello"}] len=26
+[2026-06-15 17:19:25.611] [INFO ] src/chat_service.c:458 - [DEBUG] body chars: [0]=0x7b [1]=0x22 [2]=0x74 [3]=0x6f [4]=0x22 [5]=0x3a [6]=0x22 [7]=0x7a
+[2026-06-15 17:19:25.611] [INFO ] src/chat_service.c:463 - [DEBUG] to_start offset=1
+[2026-06-15 17:19:25.611] [INFO ] src/chat_service.c:466 - [DEBUG] after +6: to_start offset=7 char=0x7a='z'
+[2026-06-15 17:19:25.611] [INFO ] src/chat_service.c:469 - [DEBUG] to_end offset=10
+[2026-06-15 17:19:25.611] [INFO ] src/chat_service.c:500 - [DEBUG] target_name=[{"to"] msg_content=["zhu]
+[2026-06-15 17:21:00.767] [INFO ] src/main.c:20 - Received signal 15, shutting down...
+[2026-06-15 17:21:00.767] [INFO ] src/reactor.c:364 - Main reactor stopped
+[2026-06-15 17:21:00.767] [INFO ] src/main.c:164 - Shutting down...
+[2026-06-15 17:21:00.767] [INFO ] src/reactor.c:279 - Sub-reactor[1] stopped
+[2026-06-15 17:21:00.767] [INFO ] src/reactor.c:279 - Sub-reactor[3] stopped
+[2026-06-15 17:21:00.768] [INFO ] src/reactor.c:279 - Sub-reactor[2] stopped
+[2026-06-15 17:21:00.768] [INFO ] src/reactor.c:279 - Sub-reactor[0] stopped
+[2026-06-15 17:21:02.993] [INFO ] src/heartbeat.c:64 - Heartbeat stopped
+[2026-06-15 17:21:02.994] [INFO ] src/reactor.c:552 - Stopping reactor...
+[2026-06-15 17:21:02.994] [INFO ] src/reactor.c:583 - Reactor stopped
+[2026-06-15 17:21:02.994] [INFO ] src/threadpool.c:111 - Threadpool destroyed
+[2026-06-15 17:21:02.994] [INFO ] src/client.c:81 - Client destroyed: fd=15, user=dong666, ip=10.11.7.214:33896
+[2026-06-15 17:21:15.801] [INFO ] src/main.c:20 - Received signal 2, shutting down...
+[2026-06-15 17:21:16.208] [INFO ] src/main.c:20 - Received signal 2, shutting down...
+[2026-06-15 17:21:23.896] [INFO ] src/main.c:110 - ========================================
+[2026-06-15 17:21:23.896] [INFO ] src/main.c:111 - IM Chat Server starting...
+[2026-06-15 17:21:23.896] [INFO ] src/main.c:112 - Configuration: port=8888, sub_reactors=4, biz_threads=4
+[2026-06-15 17:21:23.896] [INFO ] src/main.c:114 - ========================================
+[2026-06-15 17:21:23.900] [INFO ] src/db.c:48 - MySQL connected: chat_app@localhost:3306
+[2026-06-15 17:21:23.903] [INFO ] src/db.c:74 - Database 'chat_db' selected
+[2026-06-15 17:21:23.912] [INFO ] src/db.c:95 - Users table ready
+[2026-06-15 17:21:23.912] [INFO ] src/db.c:128 - Database initialization complete
+[2026-06-15 17:21:23.913] [INFO ] src/client.c:14 - Client manager initialized
+[2026-06-15 17:21:23.913] [INFO ] src/threadpool.c:81 - Threadpool created with 4 threads
+[2026-06-15 17:21:23.913] [INFO ] src/reactor.c:416 - Listening on port 8888
+[2026-06-15 17:21:23.913] [INFO ] src/reactor.c:503 - Reactor initialized: 4 sub-reactors
+[2026-06-15 17:21:23.913] [INFO ] src/heartbeat.c:54 - Heartbeat started: timeout=3600s, interval=5s
+[2026-06-15 17:21:23.913] [INFO ] src/main.c:157 - Server is ready. Waiting for connections...
+[2026-06-15 17:21:23.914] [INFO ] src/main.c:158 - Press Ctrl+C to stop the server
+[2026-06-15 17:21:23.914] [INFO ] src/reactor.c:228 - Sub-reactor[0] started, epoll_fd=7
+[2026-06-15 17:21:23.914] [INFO ] src/reactor.c:228 - Sub-reactor[3] started, epoll_fd=13
+[2026-06-15 17:21:23.914] [INFO ] src/reactor.c:228 - Sub-reactor[1] started, epoll_fd=9
+[2026-06-15 17:21:23.914] [INFO ] src/reactor.c:228 - Sub-reactor[2] started, epoll_fd=11
+[2026-06-15 17:21:23.914] [INFO ] src/reactor.c:291 - Main reactor started, listening on port (fd=5)
+[2026-06-15 17:21:38.061] [INFO ] src/client.c:70 - Client created: fd=15, ip=10.11.7.213:46620
+[2026-06-15 17:21:38.061] [INFO ] src/reactor.c:357 - Accepted connection: fd=15, ip=10.11.7.213:46620 -> sub[0]
+[2026-06-15 17:21:38.376] [INFO ] src/client.c:70 - Client created: fd=16, ip=10.11.7.214:37952
+[2026-06-15 17:21:38.376] [INFO ] src/reactor.c:357 - Accepted connection: fd=16, ip=10.11.7.214:37952 -> sub[1]
+[2026-06-15 17:21:45.228] [INFO ] src/chat_service.c:161 - Login attempt: user='zhu', pass_len=4
+[2026-06-15 17:21:45.231] [INFO ] src/db.c:236 - User login: zhu (admin=0, status=1)
+[2026-06-15 17:21:45.231] [INFO ] src/chat_service.c:190 - User login: zhu (fd=15, admin=0)
+[2026-06-15 17:21:46.077] [INFO ] src/client.c:70 - Client created: fd=18, ip=127.0.0.1:47904
+[2026-06-15 17:21:46.077] [INFO ] src/reactor.c:357 - Accepted connection: fd=18, ip=127.0.0.1:47904 -> sub[2]
+[2026-06-15 17:21:46.504] [INFO ] src/chat_service.c:161 - Login attempt: user='dong666', pass_len=4
+[2026-06-15 17:21:46.505] [INFO ] src/db.c:236 - User login: dong666 (admin=0, status=1)
+[2026-06-15 17:21:46.505] [INFO ] src/chat_service.c:190 - User login: dong666 (fd=16, admin=0)
+[2026-06-15 17:21:50.252] [INFO ] src/chat_service.c:410 - Public msg from dong666: 6
+[2026-06-15 17:21:53.259] [INFO ] src/chat_service.c:161 - Login attempt: user='qhl', pass_len=3
+[2026-06-15 17:21:53.259] [INFO ] src/db.c:236 - User login: qhl (admin=0, status=1)
+[2026-06-15 17:21:53.259] [INFO ] src/chat_service.c:190 - User login: qhl (fd=18, admin=0)
+[2026-06-15 17:21:55.905] [INFO ] src/chat_service.c:410 - Public msg from zhu: f
+[2026-06-15 17:21:57.229] [INFO ] src/chat_service.c:410 - Public msg from qhl: cd /home/qhl/code/chat && ./chat_server
+[2026-06-15 17:22:07.813] [INFO ] src/chat_service.c:457 - [DEBUG] private body: [{"to":"zhu","msg":"hello"}] len=26
+[2026-06-15 17:22:07.813] [INFO ] src/chat_service.c:458 - [DEBUG] body chars: [0]=0x7b [1]=0x22 [2]=0x74 [3]=0x6f [4]=0x22 [5]=0x3a [6]=0x22 [7]=0x7a
+[2026-06-15 17:22:07.813] [INFO ] src/chat_service.c:463 - [DEBUG] to_start offset=1
+[2026-06-15 17:22:07.813] [INFO ] src/chat_service.c:466 - [DEBUG] after +6: to_start offset=7 char=0x7a='z'
+[2026-06-15 17:22:07.813] [INFO ] src/chat_service.c:469 - [DEBUG] to_end offset=10
+[2026-06-15 17:22:07.813] [INFO ] src/chat_service.c:504 - [DEBUG] target_name=[zhu] msg_content=[hello]
+[2026-06-15 17:22:07.813] [INFO ] src/chat_service.c:534 - Private msg: qhl -> zhu: hello
+[2026-06-15 17:22:21.220] [INFO ] src/chat_service.c:457 - [DEBUG] private body: [{"to":"zhu","msg":"jb"}] len=23
+[2026-06-15 17:22:21.220] [INFO ] src/chat_service.c:458 - [DEBUG] body chars: [0]=0x7b [1]=0x22 [2]=0x74 [3]=0x6f [4]=0x22 [5]=0x3a [6]=0x22 [7]=0x7a
+[2026-06-15 17:22:21.220] [INFO ] src/chat_service.c:463 - [DEBUG] to_start offset=1
+[2026-06-15 17:22:21.220] [INFO ] src/chat_service.c:466 - [DEBUG] after +6: to_start offset=7 char=0x7a='z'
+[2026-06-15 17:22:21.220] [INFO ] src/chat_service.c:469 - [DEBUG] to_end offset=10
+[2026-06-15 17:22:21.220] [INFO ] src/chat_service.c:504 - [DEBUG] target_name=[zhu] msg_content=[jb]
+[2026-06-15 17:22:21.220] [INFO ] src/chat_service.c:534 - Private msg: qhl -> zhu: jb
+[2026-06-15 17:22:39.914] [INFO ] src/chat_service.c:457 - [DEBUG] private body: [{"to":"qhl","msg":"sb"}] len=23
+[2026-06-15 17:22:39.914] [INFO ] src/chat_service.c:458 - [DEBUG] body chars: [0]=0x7b [1]=0x22 [2]=0x74 [3]=0x6f [4]=0x22 [5]=0x3a [6]=0x22 [7]=0x71
+[2026-06-15 17:22:39.914] [INFO ] src/chat_service.c:463 - [DEBUG] to_start offset=1
+[2026-06-15 17:22:39.914] [INFO ] src/chat_service.c:466 - [DEBUG] after +6: to_start offset=7 char=0x71='q'
+[2026-06-15 17:22:39.914] [INFO ] src/chat_service.c:469 - [DEBUG] to_end offset=10
+[2026-06-15 17:22:39.914] [INFO ] src/chat_service.c:504 - [DEBUG] target_name=[qhl] msg_content=[sb]
+[2026-06-15 17:22:39.914] [INFO ] src/chat_service.c:534 - Private msg: zhu -> qhl: sb
+[2026-06-15 17:22:54.588] [INFO ] src/chat_service.c:457 - [DEBUG] private body: [{"to":"qhl","msg":"666"}] len=24
+[2026-06-15 17:22:54.588] [INFO ] src/chat_service.c:458 - [DEBUG] body chars: [0]=0x7b [1]=0x22 [2]=0x74 [3]=0x6f [4]=0x22 [5]=0x3a [6]=0x22 [7]=0x71
+[2026-06-15 17:22:54.588] [INFO ] src/chat_service.c:463 - [DEBUG] to_start offset=1
+[2026-06-15 17:22:54.588] [INFO ] src/chat_service.c:466 - [DEBUG] after +6: to_start offset=7 char=0x71='q'
+[2026-06-15 17:22:54.588] [INFO ] src/chat_service.c:469 - [DEBUG] to_end offset=10
+[2026-06-15 17:22:54.588] [INFO ] src/chat_service.c:504 - [DEBUG] target_name=[qhl] msg_content=[666]
+[2026-06-15 17:22:54.588] [INFO ] src/chat_service.c:534 - Private msg: dong666 -> qhl: 666
+[2026-06-15 17:23:31.704] [INFO ] src/chat_service.c:457 - [DEBUG] private body: [{"to":"zhu","msg":"hello"}] len=26
+[2026-06-15 17:23:31.704] [INFO ] src/chat_service.c:458 - [DEBUG] body chars: [0]=0x7b [1]=0x22 [2]=0x74 [3]=0x6f [4]=0x22 [5]=0x3a [6]=0x22 [7]=0x7a
+[2026-06-15 17:23:31.704] [INFO ] src/chat_service.c:463 - [DEBUG] to_start offset=1
+[2026-06-15 17:23:31.704] [INFO ] src/chat_service.c:466 - [DEBUG] after +6: to_start offset=7 char=0x7a='z'
+[2026-06-15 17:23:31.704] [INFO ] src/chat_service.c:469 - [DEBUG] to_end offset=10
+[2026-06-15 17:23:31.704] [INFO ] src/chat_service.c:504 - [DEBUG] target_name=[zhu] msg_content=[hello]
+[2026-06-15 17:23:31.704] [INFO ] src/chat_service.c:534 - Private msg: qhl -> zhu: hello
+[2026-06-15 17:23:33.644] [INFO ] src/chat_service.c:457 - [DEBUG] private body: [{"to":"zhu","msg":"hello"}] len=26
+[2026-06-15 17:23:33.644] [INFO ] src/chat_service.c:458 - [DEBUG] body chars: [0]=0x7b [1]=0x22 [2]=0x74 [3]=0x6f [4]=0x22 [5]=0x3a [6]=0x22 [7]=0x7a
+[2026-06-15 17:23:33.644] [INFO ] src/chat_service.c:463 - [DEBUG] to_start offset=1
+[2026-06-15 17:23:33.644] [INFO ] src/chat_service.c:466 - [DEBUG] after +6: to_start offset=7 char=0x7a='z'
+[2026-06-15 17:23:33.644] [INFO ] src/chat_service.c:469 - [DEBUG] to_end offset=10
+[2026-06-15 17:23:33.644] [INFO ] src/chat_service.c:504 - [DEBUG] target_name=[zhu] msg_content=[hello]
+[2026-06-15 17:23:33.644] [INFO ] src/chat_service.c:534 - Private msg: qhl -> zhu: hello
+[2026-06-15 17:23:35.444] [INFO ] src/chat_service.c:457 - [DEBUG] private body: [{"to":"zhu","msg":"hello"}] len=26
+[2026-06-15 17:23:35.444] [INFO ] src/chat_service.c:458 - [DEBUG] body chars: [0]=0x7b [1]=0x22 [2]=0x74 [3]=0x6f [4]=0x22 [5]=0x3a [6]=0x22 [7]=0x7a
+[2026-06-15 17:23:35.444] [INFO ] src/chat_service.c:463 - [DEBUG] to_start offset=1
+[2026-06-15 17:23:35.444] [INFO ] src/chat_service.c:466 - [DEBUG] after +6: to_start offset=7 char=0x7a='z'
+[2026-06-15 17:23:35.444] [INFO ] src/chat_service.c:469 - [DEBUG] to_end offset=10
+[2026-06-15 17:23:35.444] [INFO ] src/chat_service.c:504 - [DEBUG] target_name=[zhu] msg_content=[hello]
+[2026-06-15 17:23:35.444] [INFO ] src/chat_service.c:534 - Private msg: qhl -> zhu: hello
+[2026-06-15 17:23:36.693] [INFO ] src/chat_service.c:457 - [DEBUG] private body: [{"to":"zhu","msg":"hello"}] len=26
+[2026-06-15 17:23:36.693] [INFO ] src/chat_service.c:458 - [DEBUG] body chars: [0]=0x7b [1]=0x22 [2]=0x74 [3]=0x6f [4]=0x22 [5]=0x3a [6]=0x22 [7]=0x7a
+[2026-06-15 17:23:36.693] [INFO ] src/chat_service.c:463 - [DEBUG] to_start offset=1
+[2026-06-15 17:23:36.693] [INFO ] src/chat_service.c:466 - [DEBUG] after +6: to_start offset=7 char=0x7a='z'
+[2026-06-15 17:23:36.693] [INFO ] src/chat_service.c:469 - [DEBUG] to_end offset=10
+[2026-06-15 17:23:36.693] [INFO ] src/chat_service.c:504 - [DEBUG] target_name=[zhu] msg_content=[hello]
+[2026-06-15 17:23:36.693] [INFO ] src/chat_service.c:534 - Private msg: qhl -> zhu: hello
+[2026-06-15 17:23:38.134] [INFO ] src/chat_service.c:457 - [DEBUG] private body: [{"to":"zhu","msg":"hello"}] len=26
+[2026-06-15 17:23:38.134] [INFO ] src/chat_service.c:458 - [DEBUG] body chars: [0]=0x7b [1]=0x22 [2]=0x74 [3]=0x6f [4]=0x22 [5]=0x3a [6]=0x22 [7]=0x7a
+[2026-06-15 17:23:38.134] [INFO ] src/chat_service.c:463 - [DEBUG] to_start offset=1
+[2026-06-15 17:23:38.134] [INFO ] src/chat_service.c:466 - [DEBUG] after +6: to_start offset=7 char=0x7a='z'
+[2026-06-15 17:23:38.134] [INFO ] src/chat_service.c:469 - [DEBUG] to_end offset=10
+[2026-06-15 17:23:38.134] [INFO ] src/chat_service.c:504 - [DEBUG] target_name=[zhu] msg_content=[hello]
+[2026-06-15 17:23:38.134] [INFO ] src/chat_service.c:534 - Private msg: qhl -> zhu: hello
+[2026-06-15 17:23:39.423] [INFO ] src/chat_service.c:457 - [DEBUG] private body: [{"to":"zhu","msg":"hello"}] len=26
+[2026-06-15 17:23:39.423] [INFO ] src/chat_service.c:458 - [DEBUG] body chars: [0]=0x7b [1]=0x22 [2]=0x74 [3]=0x6f [4]=0x22 [5]=0x3a [6]=0x22 [7]=0x7a
+[2026-06-15 17:23:39.423] [INFO ] src/chat_service.c:463 - [DEBUG] to_start offset=1
+[2026-06-15 17:23:39.423] [INFO ] src/chat_service.c:466 - [DEBUG] after +6: to_start offset=7 char=0x7a='z'
+[2026-06-15 17:23:39.423] [INFO ] src/chat_service.c:469 - [DEBUG] to_end offset=10
+[2026-06-15 17:23:39.423] [INFO ] src/chat_service.c:504 - [DEBUG] target_name=[zhu] msg_content=[hello]
+[2026-06-15 17:23:39.423] [INFO ] src/chat_service.c:534 - Private msg: qhl -> zhu: hello
+[2026-06-15 17:24:19.011] [INFO ] src/chat_service.c:410 - Public msg from dong666: giao
+[2026-06-15 17:24:27.939] [INFO ] src/chat_service.c:410 - Public msg from qhl: nihao
+[2026-06-15 17:24:33.770] [INFO ] src/chat_service.c:410 - Public msg from qhl: nihao
+[2026-06-15 17:24:41.738] [INFO ] src/chat_service.c:457 - [DEBUG] private body: [{"to":"zhu","msg":"jb"}] len=23
+[2026-06-15 17:24:41.738] [INFO ] src/chat_service.c:458 - [DEBUG] body chars: [0]=0x7b [1]=0x22 [2]=0x74 [3]=0x6f [4]=0x22 [5]=0x3a [6]=0x22 [7]=0x7a
+[2026-06-15 17:24:41.738] [INFO ] src/chat_service.c:463 - [DEBUG] to_start offset=1
+[2026-06-15 17:24:41.738] [INFO ] src/chat_service.c:466 - [DEBUG] after +6: to_start offset=7 char=0x7a='z'
+[2026-06-15 17:24:41.738] [INFO ] src/chat_service.c:469 - [DEBUG] to_end offset=10
+[2026-06-15 17:24:41.738] [INFO ] src/chat_service.c:504 - [DEBUG] target_name=[zhu] msg_content=[jb]
+[2026-06-15 17:24:41.738] [INFO ] src/chat_service.c:534 - Private msg: qhl -> zhu: jb
+[2026-06-15 17:25:16.908] [INFO ] src/chat_service.c:410 - Public msg from dong666: 方瑞通
+[2026-06-15 17:25:54.536] [INFO ] src/chat_service.c:410 - Public msg from dong666: 占领东发表个人与it
+[2026-06-15 17:26:43.779] [INFO ] src/chat_service.c:410 - Public msg from dong666: 占m78星云，摧毁银河系
+[2026-06-15 17:27:03.357] [INFO ] src/chat_service.c:410 - Public msg from qhl: 真牛逼
+[2026-06-15 17:27:20.497] [INFO ] src/chat_service.c:410 - Public msg from dong666: 大家好，我是处
+[2026-06-15 17:27:23.713] [INFO ] src/chat_service.c:410 - Public msg from qhl: 大家好 ，我是朱钱山
+[2026-06-15 17:27:33.636] [INFO ] src/chat_service.c:410 - Public msg from qhl: 我是个傻逼
+[2026-06-15 17:28:01.391] [INFO ] src/chat_service.c:410 - Public msg from zhu: 我草泥马
+[2026-06-15 17:28:49.853] [INFO ] src/reactor.c:256 - fd=18 error/hangup event
+[2026-06-15 17:28:49.853] [INFO ] src/client.c:81 - Client destroyed: fd=18, user=qhl, ip=127.0.0.1:47904
+[2026-06-15 17:28:51.943] [INFO ] src/main.c:20 - Received signal 2, shutting down...
+[2026-06-15 17:28:51.944] [INFO ] src/reactor.c:364 - Main reactor stopped
+[2026-06-15 17:28:51.944] [INFO ] src/main.c:164 - Shutting down...
+[2026-06-15 17:28:51.944] [INFO ] src/reactor.c:279 - Sub-reactor[3] stopped
+[2026-06-15 17:28:51.944] [INFO ] src/reactor.c:279 - Sub-reactor[2] stopped
+[2026-06-15 17:28:51.944] [INFO ] src/reactor.c:279 - Sub-reactor[0] stopped
+[2026-06-15 17:28:51.944] [INFO ] src/reactor.c:279 - Sub-reactor[1] stopped
+[2026-06-15 17:28:54.472] [INFO ] src/heartbeat.c:64 - Heartbeat stopped
+[2026-06-15 17:28:54.472] [INFO ] src/reactor.c:552 - Stopping reactor...
+[2026-06-15 17:28:54.472] [INFO ] src/reactor.c:583 - Reactor stopped
+[2026-06-15 17:28:54.473] [INFO ] src/threadpool.c:111 - Threadpool destroyed
+[2026-06-15 17:28:54.473] [INFO ] src/client.c:81 - Client destroyed: fd=15, user=zhu, ip=10.11.7.213:46620
+[2026-06-15 17:29:18.902] [INFO ] src/main.c:110 - ========================================
+[2026-06-15 17:29:18.902] [INFO ] src/main.c:111 - IM Chat Server starting...
+[2026-06-15 17:29:18.902] [INFO ] src/main.c:112 - Configuration: port=8888, sub_reactors=4, biz_threads=4
+[2026-06-15 17:29:18.902] [INFO ] src/main.c:114 - ========================================
+[2026-06-15 17:29:18.906] [INFO ] src/db.c:48 - MySQL connected: chat_app@localhost:3306
+[2026-06-15 17:29:18.909] [INFO ] src/db.c:74 - Database 'chat_db' selected
+[2026-06-15 17:29:18.912] [INFO ] src/db.c:95 - Users table ready
+[2026-06-15 17:29:18.913] [INFO ] src/db.c:128 - Database initialization complete
+[2026-06-15 17:29:18.913] [INFO ] src/client.c:14 - Client manager initialized
+[2026-06-15 17:29:18.914] [INFO ] src/threadpool.c:81 - Threadpool created with 4 threads
+[2026-06-15 17:29:18.914] [INFO ] src/reactor.c:416 - Listening on port 8888
+[2026-06-15 17:29:18.914] [INFO ] src/reactor.c:503 - Reactor initialized: 4 sub-reactors
+[2026-06-15 17:29:18.914] [INFO ] src/heartbeat.c:54 - Heartbeat started: timeout=3600s, interval=5s
+[2026-06-15 17:29:18.914] [INFO ] src/main.c:157 - Server is ready. Waiting for connections...
+[2026-06-15 17:29:18.914] [INFO ] src/main.c:158 - Press Ctrl+C to stop the server
+[2026-06-15 17:29:18.914] [INFO ] src/reactor.c:291 - Main reactor started, listening on port (fd=5)
+[2026-06-15 17:29:18.914] [INFO ] src/reactor.c:228 - Sub-reactor[0] started, epoll_fd=7
+[2026-06-15 17:29:18.914] [INFO ] src/reactor.c:228 - Sub-reactor[1] started, epoll_fd=9
+[2026-06-15 17:29:18.914] [INFO ] src/reactor.c:228 - Sub-reactor[2] started, epoll_fd=11
+[2026-06-15 17:29:18.914] [INFO ] src/reactor.c:228 - Sub-reactor[3] started, epoll_fd=13
+[2026-06-15 17:29:28.447] [INFO ] src/client.c:70 - Client created: fd=15, ip=127.0.0.1:54062
+[2026-06-15 17:29:28.447] [INFO ] src/reactor.c:357 - Accepted connection: fd=15, ip=127.0.0.1:54062 -> sub[0]
+[2026-06-15 17:29:40.166] [INFO ] src/db.c:236 - User login: qhl (admin=0, status=1)
+[2026-06-15 17:29:40.166] [INFO ] src/chat_service.c:189 - User login: qhl (fd=15, admin=0)
+[2026-06-15 17:29:53.925] [INFO ] src/client.c:70 - Client created: fd=16, ip=10.11.7.213:54568
+[2026-06-15 17:29:53.934] [INFO ] src/reactor.c:357 - Accepted connection: fd=16, ip=10.11.7.213:54568 -> sub[1]
+[2026-06-15 17:30:03.080] [INFO ] src/db.c:236 - User login: zhu (admin=0, status=1)
+[2026-06-15 17:30:03.080] [INFO ] src/chat_service.c:189 - User login: zhu (fd=16, admin=0)
+[2026-06-15 17:30:10.789] [INFO ] src/chat_service.c:523 - Private msg: qhl -> zhu: 123

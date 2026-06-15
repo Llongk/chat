@@ -158,7 +158,6 @@ static void handle_login(chat_task_t *task)
 
     /* 数据库验证登录 */
     int is_admin = 0, user_status = 1;
-    LOG_INFO("Login attempt: user='%s', pass_len=%zu", username, strlen(password));
     int login_ret = db_user_login(username, password, &is_admin, &user_status);
 
     if (login_ret == ERR_NOT_FOUND) {
@@ -458,16 +457,20 @@ static void handle_private_msg(chat_task_t *task)
     if (to_start) {
         to_start += 6;
         char *to_end = strchr(to_start, '"');
-        if (to_end) {
-            *to_end = '\0';
-            target_name = to_start;
-        }
+
+        /* 先解析 msg_content（在 body 被修改之前） */
         char *msg_start = strstr(body, "\"msg\":\"");
         if (msg_start) {
             msg_start += 7;
             char *msg_end = strchr(msg_start, '"');
             if (msg_end) *msg_end = '\0';
             msg_content = msg_start;
+        }
+
+        /* 再截断 target_name（不影响 msg 解析） */
+        if (to_end) {
+            *to_end = '\0';
+            target_name = to_start;
         }
     }
 

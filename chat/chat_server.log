@@ -844,3 +844,67 @@
 [2026-06-15 19:18:10.529] [INFO ] src/threadpool.c:111 - Threadpool destroyed
 [2026-06-15 19:18:10.529] [INFO ] src/client.c:28 - Client manager destroyed
 [2026-06-15 19:18:10.529] [INFO ] src/db.c:137 - MySQL connection closed
+[2026-06-15 19:53:06.247] [INFO ] src/main.c:114 - ========================================
+[2026-06-15 19:53:06.247] [INFO ] src/main.c:115 - IM Chat Server starting...
+[2026-06-15 19:53:06.247] [INFO ] src/main.c:116 - Configuration: port=8888, sub_reactors=4, biz_threads=4
+[2026-06-15 19:53:06.247] [INFO ] src/main.c:118 - ========================================
+[2026-06-15 19:53:06.252] [INFO ] src/db.c:48 - MySQL connected: chat_app@localhost:3306
+[2026-06-15 19:53:06.257] [INFO ] src/db.c:74 - Database 'chat_db' selected
+[2026-06-15 19:53:06.259] [INFO ] src/db.c:95 - Users table ready
+[2026-06-15 19:53:06.259] [INFO ] src/db.c:128 - Database initialization complete
+[2026-06-15 19:53:06.260] [INFO ] src/client.c:15 - Client manager initialized
+[2026-06-15 19:53:06.260] [INFO ] src/threadpool.c:83 - Threadpool created with 4 threads
+[2026-06-15 19:53:06.260] [INFO ] src/reactor.c:417 - Listening on port 8888
+[2026-06-15 19:53:06.260] [INFO ] src/reactor.c:504 - Reactor initialized: 4 sub-reactors
+[2026-06-15 19:53:06.260] [INFO ] src/heartbeat.c:57 - Heartbeat started: timeout=3600s, interval=5s
+[2026-06-15 19:53:06.260] [INFO ] src/main.c:161 - Server is ready. Waiting for connections...
+[2026-06-15 19:53:06.260] [INFO ] src/main.c:162 - Press Ctrl+C to stop the server
+[2026-06-15 19:53:06.260] [INFO ] src/reactor.c:291 - Main reactor started, listening on port (fd=5)
+[2026-06-15 19:53:06.260] [INFO ] src/reactor.c:228 - Sub-reactor[3] started, epoll_fd=13
+[2026-06-15 19:53:06.260] [INFO ] src/reactor.c:228 - Sub-reactor[0] started, epoll_fd=7
+[2026-06-15 19:53:06.260] [INFO ] src/reactor.c:228 - Sub-reactor[1] started, epoll_fd=9
+[2026-06-15 19:53:06.260] [INFO ] src/reactor.c:228 - Sub-reactor[2] started, epoll_fd=11
+[2026-06-15 19:53:34.909] [INFO ] src/client.c:73 - Client created: fd=15, ip=127.0.0.1:39994
+[2026-06-15 19:53:34.909] [INFO ] src/reactor.c:357 - Accepted connection: fd=15, ip=127.0.0.1:39994 -> sub[0]
+[2026-06-15 19:53:49.891] [INFO ] src/db.c:236 - User login: qhl (admin=0, status=1)
+[2026-06-15 19:53:49.891] [INFO ] src/chat_service.c:191 - User login: qhl (fd=15, admin=0)
+[2026-06-15 19:53:54.228] [INFO ] src/chat_service.c:411 - Public msg from qhl: nihao
+[2026-06-15 19:54:22.830] [INFO ] src/client.c:73 - Client created: fd=16, ip=127.0.0.1:37728
+[2026-06-15 19:54:22.830] [INFO ] src/reactor.c:357 - Accepted connection: fd=16, ip=127.0.0.1:37728 -> sub[1]
+[2026-06-15 19:54:41.466] [INFO ] src/db.c:236 - User login: admin (admin=1, status=1)
+[2026-06-15 19:54:41.466] [INFO ] src/chat_service.c:191 - User login: admin (fd=16, admin=1)
+[2026-06-15 19:55:27.875] [INFO ] src/chat_service.c:411 - Public msg from admin: niho
+[2026-06-15 19:55:46.287] [INFO ] src/chat_service.c:411 - Public msg from qhl: 123
+[2026-06-15 19:56:31.450] [INFO ] src/chat_service.c:411 - Public msg from qhl: 123\n123
+[2026-06-15 19:56:44.999] [INFO ] src/chat_service.c:411 - Public msg from qhl: 123\n123
+[2026-06-15 20:03:02.507] [INFO ] src/reactor.c:256 - fd=15 error/hangup event
+[2026-06-15 20:03:02.507] [INFO ] src/client.c:85 - Client destroyed: fd=15, user=qhl, ip=127.0.0.1:39994
+[2026-06-15 20:03:06.659] [INFO ] src/client.c:73 - Client created: fd=15, ip=127.0.0.1:44366
+[2026-06-15 20:03:06.659] [INFO ] src/reactor.c:357 - Accepted connection: fd=15, ip=127.0.0.1:44366 -> sub[2]
+[2026-06-15 20:03:20.622] [INFO ] src/db.c:236 - User login: qhl (admin=0, status=1)
+[2026-06-15 20:03:20.622] [INFO ] src/chat_service.c:191 - User login: qhl (fd=15, admin=0)
+[2026-06-15 20:03:24.104] [INFO ] src/chat_service.c:411 - Public msg from qhl: » 你好\n今天天气真好\n一起出去玩吧
+[2026-06-15 20:17:05.883] [INFO ] src/reactor.c:256 - fd=15 error/hangup event
+[2026-06-15 20:17:05.883] [INFO ] src/client.c:85 - Client destroyed: fd=15, user=qhl, ip=127.0.0.1:44366
+[2026-06-15 20:17:10.290] [INFO ] src/client.c:73 - Client created: fd=15, ip=127.0.0.1:59948
+[2026-06-15 20:17:10.290] [INFO ] src/reactor.c:357 - Accepted connection: fd=15, ip=127.0.0.1:59948 -> sub[3]
+[2026-06-15 20:17:24.388] [INFO ] src/db.c:236 - User login: qhl (admin=0, status=1)
+[2026-06-15 20:17:24.388] [INFO ] src/chat_service.c:191 - User login: qhl (fd=15, admin=0)
+[2026-06-15 20:17:35.998] [INFO ] src/chat_service.c:411 - Public msg from qhl: » 你好\n今天天气真好\n一起出去玩吧
+[2026-06-15 20:18:28.622] [INFO ] src/chat_service.c:411 - Public msg from qhl: 你好\n今天天气真好\n一起出去玩吧
+[2026-06-15 20:18:44.047] [INFO ] src/main.c:20 - Received signal 2, shutting down...
+[2026-06-15 20:18:44.047] [INFO ] src/reactor.c:364 - Main reactor stopped
+[2026-06-15 20:18:44.047] [INFO ] src/main.c:168 - Shutting down...
+[2026-06-15 20:18:44.047] [INFO ] src/reactor.c:279 - Sub-reactor[2] stopped
+[2026-06-15 20:18:44.047] [INFO ] src/reactor.c:279 - Sub-reactor[3] stopped
+[2026-06-15 20:18:44.047] [INFO ] src/reactor.c:279 - Sub-reactor[1] stopped
+[2026-06-15 20:18:44.048] [INFO ] src/reactor.c:279 - Sub-reactor[0] stopped
+[2026-06-15 20:18:48.369] [INFO ] src/heartbeat.c:68 - Heartbeat stopped
+[2026-06-15 20:18:48.369] [INFO ] src/reactor.c:556 - Stopping reactor...
+[2026-06-15 20:18:48.369] [INFO ] src/reactor.c:587 - Reactor stopped
+[2026-06-15 20:18:48.371] [INFO ] src/threadpool.c:114 - Threadpool destroyed
+[2026-06-15 20:18:48.371] [INFO ] src/client.c:85 - Client destroyed: fd=15, user=qhl, ip=127.0.0.1:59948
+[2026-06-15 20:22:03.015] [INFO ] src/main.c:20 - Received signal 2, shutting down...
+[2026-06-15 20:22:03.262] [INFO ] src/main.c:20 - Received signal 2, shutting down...
+[2026-06-15 20:22:03.401] [INFO ] src/main.c:20 - Received signal 2, shutting down...
+[2026-06-15 20:22:03.612] [INFO ] src/main.c:20 - Received signal 2, shutting down...

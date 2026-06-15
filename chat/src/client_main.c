@@ -101,6 +101,21 @@ static int json_get_int(const char *json, const char *key)
     return p ? atoi(p + strlen(search)) : 0;
 }
 
+/* 将字面量 \n (反斜杠+n) 转换为真正的换行符, 原地修改 */
+static void convert_newlines(char *s)
+{
+    char *r = s, *w = s;
+    while (*r) {
+        if (*r == '\\' && *(r + 1) == 'n') {
+            *w++ = '\n';
+            r += 2;
+        } else {
+            *w++ = *r++;
+        }
+    }
+    *w = '\0';
+}
+
 /* ── 解析 "用户名 密码" 参数 ── */
 /* 从 "用户名 密码" 格式的参数中拆分出用户名和密码 */
 static int parse_user_pass(const char *rest, char *user, char *pass, size_t sz)
@@ -127,23 +142,67 @@ static int parse_user_pass(const char *rest, char *user, char *pass, size_t sz)
 }
 
 /* ══════════════════════════════════════════
- *  消息气泡渲染 (统一左右对齐)
+ *  消息气泡渲染 (支持自动换行 + 左右对齐)
  *
  *  align:  1=右对齐(自己)  0=左对齐(别人)
  *  color:  气泡边框颜色
- *  label:  底部标签, 如 "18:30:05 qhl" 或 "18:30:05 zhu → 你"
- *  msg:    消息内容
+ *  label:  底部标签, 如 "18:30:05 qhl"
+ *  msg:    消息内容 (支持长文本自动换行)
  * ══════════════════════════════════════════ */
+
+#define MAX_BUBBLE_LINES 64
 
 static void draw_bubble(int align, const char *color,
                         const char *label, const char *msg)
 {
     int term_w = get_term_width();
-    int msg_w  = (int)strlen(msg) + 2;   /* " msg " */
-    int lbl_w  = (int)strlen(label);
-    int box_w  = msg_w > lbl_w ? msg_w : lbl_w;
+    int content_w = term_w - 8;          /* 最大内容可视宽度 */
+    if (content_w < 8) content_w = 8;
+
+    /* 将消息按可视宽度拆分为多行 (中文字符占2列) */
+    const char *lines[MAX_BUBBLE_LINES];
+    int line_lens[MAX_BUBBLE_LINES];
+    int line_cols[MAX_BUBBLE_LINES];
+    int line_count = 0;
+
+    lines[0] = msg;
+    int col = 0;
+    for (const char *p = msg; *p && line_count < MAX_BUBBLE_LINES; ) {
+        unsigned char ch = (unsigned char)*p;
+        int cw;
+        if (ch >= 0xE0 && ch <= 0xEF && p[1] && p[2]) {
+            cw = 2; p += 3;  /* 中文字符: 3字节UTF-8, 占2列 */
+        } else if (ch >= 0xC0 && p[1]) {
+            cw = 1; p += 2;  /* 2字节UTF-8 */
+        } else {
+            cw = 1; p += 1;  /* ASCII */
+        }
+
+        /* 到达行宽或遇到换行符时, 切行 */
+        if (col + cw > content_w || *(p - 1) == '\n') {
+            line_lens[line_count] = (int)(p - lines[line_count]);
+            line_cols[line_count] = col;
+            line_count++;
+            if (line_count >= MAX_BUBBLE_LINES) break;
+            lines[line_count] = p;
+            col = 0;
+        } else {
+            col += cw;
+        }
+    }
+    /* 最后一行 */
+    line_lens[line_count] = (int)(strlen(lines[line_count]));
+    line_cols[line_count] = col;
+    line_count++;
+
+    /* 气泡宽度 = 最长行的可视宽度 + 2 (左右空格) */
+    int max_cols = 0;
+    for (int i = 0; i < line_count; i++)
+        if (line_cols[i] > max_cols) max_cols = line_cols[i];
+    int box_w = max_cols + 2;
+    int lbl_w = (int)strlen(label);
+    if (lbl_w > box_w) box_w = lbl_w;
     if (box_w < 10) box_w = 10;
-    if (box_w > term_w - 4) box_w = term_w - 4;
 
     /* 左对齐固定 2 列缩进, 右对齐动态计算 */
     int pad = align ? (term_w - box_w - 4) : 2;
@@ -156,11 +215,16 @@ static void draw_bubble(int align, const char *color,
     for (int i = 0; i < box_w - 2; i++) printf("─");
     printf("╮" CLR_RESET "\n");
 
-    /* │ msg │ */
-    printf("%*s%s│" CLR_RESET " %s", pad, "", color, msg);
-    int fill = box_w - 2 - (int)strlen(msg) - 1;
-    for (int i = 0; i < (fill > 0 ? fill : 0); i++) printf(" ");
-    printf("%s│" CLR_RESET "\n", color);
+    /* │ 每行消息 │ (打印时去掉行尾的\n) */
+    for (int i = 0; i < line_count; i++) {
+        printf("%*s%s│" CLR_RESET " ", pad, "", color);
+        int plen = line_lens[i];
+        if (plen > 0 && lines[i][plen - 1] == '\n') plen--;
+        printf("%.*s", plen, lines[i]);
+        int fill = (box_w - 2) - line_cols[i] - 1;
+        for (int j = 0; j < (fill > 0 ? fill : 0); j++) printf(" ");
+        printf("%s│" CLR_RESET "\n", color);
+    }
 
     /* ╰───╯ */
     printf("%*s%s╰", pad, "", color);
@@ -246,6 +310,7 @@ static void handle_public_broadcast(const char *body, const char *time_str)
     json_get_str(body, "msg",  msg,  sizeof(msg));
     json_get_str(body, "type", type, sizeof(type));
     int is_admin = json_get_int(body, "is_admin");
+    convert_newlines(msg);  /* 将 \n 转换为真正换行 */
 
     if (strcmp(type, "join") == 0) {
         print_system_msg("✦", CLR_GREEN, "");
@@ -277,6 +342,7 @@ static void handle_private_resp(const char *body, const char *time_str)
     json_get_str(body, "msg",  msg,  sizeof(msg));
     json_get_str(body, "status", status, sizeof(status));
     int is_admin = json_get_int(body, "is_admin");
+    convert_newlines(msg);  /* 将 \n 转换为真正换行 */
 
     if (from[0]) {
         /* 别人发给我的私聊 */
@@ -644,6 +710,11 @@ int main(int argc, char *argv[])
             const char *msg_text = space + 1;
             while (*msg_text == ' ') msg_text++;
 
+            /* 复制并转换换行符, 用于本地显示 */
+            char msg_copy[MAX_MSG_LEN];
+            safe_strncpy(msg_copy, msg_text, MAX_MSG_LEN);
+            convert_newlines(msg_copy);
+
             char body[MAX_MSG_LEN];
             snprintf(body, sizeof(body),
                      "{\"to\":\"%s\",\"msg\":\"%s\"}", target, msg_text);
@@ -652,7 +723,7 @@ int main(int argc, char *argv[])
             /* 本地立即显示右对齐气泡 */
             char t_str[16];
             get_time_str(t_str, sizeof(t_str));
-            show_self_private(target, msg_text, t_str);
+            show_self_private(target, msg_copy, t_str);
             print_prompt();
             continue;
         }

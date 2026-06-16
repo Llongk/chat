@@ -6,6 +6,7 @@
 #include "heartbeat.h"
 #include "chat_service.h"
 #include "db.h"
+#include "ai_service.h"
 
 /* 全局变量, 用于信号处理 */
 static reactor_t     g_reactor;
@@ -58,7 +59,7 @@ static void print_banner(void)
 {
     printf("\n");
     printf("╔══════════════════════════════════════════════════╗\n");
-    printf("║      High-Concurrency IM Chat Server             ║\n");
+    printf("║      High-Concurrency IM Chat Server + AI        ║\n");
     printf("║      epoll ET + Reactor + ThreadPool + RingBuf   ║\n");
     printf("╚══════════════════════════════════════════════════╝\n");
     printf("\n");
@@ -74,6 +75,7 @@ static void print_usage(const char *prog)
            DEFAULT_SUB_REACTORS);
     printf("  -t <num>       Business thread count (default: %d)\n",
            DEFAULT_BIZ_THREADS);
+    printf("  -k <key>       DeepSeek API Key (enable AI assistant)\n");
     printf("  -l <file>      Log file path (default: stdout only)\n");
     printf("  -h             Show this help\n");
 }
@@ -85,14 +87,17 @@ int main(int argc, char *argv[])
     int sub_count  = DEFAULT_SUB_REACTORS;
     int biz_threads = DEFAULT_BIZ_THREADS;
     const char *log_file = "chat_server.log";
+    const char *ai_key   = NULL;
+    static char ai_key_buf[128] = "";  /* 从文件读取的 Key 缓冲区 */
 
     /* 解析命令行参数 */
     int opt;
-    while ((opt = getopt(argc, argv, "p:s:t:l:h")) != -1) {
+    while ((opt = getopt(argc, argv, "p:s:t:k:l:h")) != -1) {
         switch (opt) {
         case 'p': port        = atoi(optarg); break;
         case 's': sub_count   = atoi(optarg); break;
         case 't': biz_threads = atoi(optarg); break;
+        case 'k': ai_key      = optarg;       break;
         case 'l': log_file    = optarg;       break;
         case 'h':
             print_usage(argv[0]);
@@ -100,6 +105,21 @@ int main(int argc, char *argv[])
         default:
             print_usage(argv[0]);
             return 1;
+        }
+    }
+
+    /* 如果未通过 -k 指定 API Key, 尝试从 ai.key 文件读取 */
+    if (!ai_key) {
+        FILE *fk = fopen("ai.key", "r");
+        if (fk) {
+            if (fgets(ai_key_buf, sizeof(ai_key_buf), fk)) {
+                /* 去掉行尾换行符 */
+                size_t len = strlen(ai_key_buf);
+                while (len > 0 && (ai_key_buf[len-1] == '\n' || ai_key_buf[len-1] == '\r'))
+                    ai_key_buf[--len] = '\0';
+                if (len > 0) ai_key = ai_key_buf;
+            }
+            fclose(fk);
         }
     }
 
@@ -115,7 +135,11 @@ int main(int argc, char *argv[])
     LOG_INFO("IM Chat Server starting...");
     LOG_INFO("Configuration: port=%d, sub_reactors=%d, biz_threads=%d",
              port, sub_count, biz_threads);
+    if (ai_key) LOG_INFO("AI assistant: enabled (DeepSeek)");
     LOG_INFO("========================================");
+
+    /* 初始化 AI 服务 (可选, 无 API Key 则跳过) */
+    ai_init(ai_key);
 
     /* 初始化数据库 */
     if (db_init() != 0) {

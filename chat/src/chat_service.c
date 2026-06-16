@@ -3,6 +3,7 @@
 #include "ratelimit.h"
 #include "logger.h"
 #include "db.h"
+#include "ai_service.h"
 
 /* 子 Reactor 通知机制: 全局 eventfd 数组 (由 reactor 初始化) */
 #define MAX_SUB_REACTORS 64
@@ -492,7 +493,49 @@ static void handle_private_msg(chat_task_t *task)
         }
     }
 
-    /* 查找目标客户端 */
+    /* ═══ AI 助手特殊处理 ═══ */
+    /* 如果目标是 AI 助手, 调用大模型 API 获取回复 */
+    if (strcmp(target_name, "AI") == 0 || strcmp(target_name, "小D") == 0) {
+        if (!ai_is_ready()) {
+            const char *err = "{\"status\":\"error\",\"msg\":\"AI 服务未启用 (服务端需要配置 --ai-key)\"}";
+            chat_send_message(task->fd, MSG_PRIVATE_RESP,
+                              (const uint8_t *)err, strlen(err));
+            return;
+        }
+
+        /* 调用 AI API (此操作可能耗时数秒, 但在线程池中执行不阻塞 I/O) */
+        char ai_reply[AI_MAX_REPLY];
+        if (ai_chat(msg_content ? msg_content : "", ai_reply, sizeof(ai_reply)) == 0) {
+            /* 将 AI 回复中的换行转为 \n 字面量 (JSON 安全) */
+            char json_safe[AI_MAX_REPLY * 2];
+            size_t ji = 0;
+            for (size_t i = 0; ai_reply[i] && ji < sizeof(json_safe) - 2; i++) {
+                if (ai_reply[i] == '\n') {
+                    json_safe[ji++] = '\\'; json_safe[ji++] = 'n';
+                } else if (ai_reply[i] == '"') {
+                    json_safe[ji++] = '\\'; json_safe[ji++] = '"';
+                } else {
+                    json_safe[ji++] = ai_reply[i];
+                }
+            }
+            json_safe[ji] = '\0';
+
+            /* 以私聊形式回复给发送者, from 显示为 "小D" */
+            char reply_msg[AI_MAX_REPLY * 2 + 256];
+            snprintf(reply_msg, sizeof(reply_msg),
+                     "{\"type\":\"private\",\"from\":\"小D\",\"is_admin\":0,\"msg\":\"%s\"}",
+                     json_safe);
+            chat_send_message(task->fd, MSG_PRIVATE_RESP,
+                              (const uint8_t *)reply_msg, strlen(reply_msg));
+        } else {
+            const char *err = "{\"status\":\"error\",\"msg\":\"AI 回复失败, 请稍后重试\"}";
+            chat_send_message(task->fd, MSG_PRIVATE_RESP,
+                              (const uint8_t *)err, strlen(err));
+        }
+        return;
+    }
+
+    /* ═══ 普通私聊: 查找目标客户端 ═══ */
     client_t *target = client_find_by_name(target_name);
     if (!target || !target->logged_in) {
         char err[256];

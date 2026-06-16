@@ -553,6 +553,7 @@ static void show_welcome(const char *ip, int port)
     printf("\n");
     printf("%*s" CLR_GREEN "直接输入" CLR_RESET "                  公屏消息\n", pad, "");
     printf("%*s" CLR_YELLOW "/to" CLR_RESET "      <用户> <消息>    私聊\n", pad, "");
+    printf("%*s" CLR_BOLD CLR_MAGENTA "/to AI" CLR_RESET "   <消息>            AI 助手\n", pad, "");
     printf("%*s" CLR_MAGENTA "/online" CLR_RESET "                   在线列表\n", pad, "");
     printf("\n");
     printf("%*s" CLR_RED "/kick" CLR_RESET "      <用户>          踢人\n", pad, "");
@@ -616,7 +617,7 @@ int main(int argc, char *argv[])
         if (strcmp(input, "/help") == 0 || strcmp(input, "/h") == 0) {
             printf("\n");
             printf(CLR_DIM "  账号" CLR_RESET "  /register /login\n");
-            printf(CLR_DIM "  聊天" CLR_RESET "  直接输入文字 /to /online\n");
+            printf(CLR_DIM "  聊天" CLR_RESET "  直接输入文字 /to /to AI /online\n");
             printf(CLR_DIM "  管理" CLR_RESET "  /kick /quit\n\n");
             print_prompt();
             continue;

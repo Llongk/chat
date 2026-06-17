@@ -1418,3 +1418,152 @@ void strcpy_custom(ch
 [2026-06-17 10:09:15.464] [INFO ] src/reactor.c:587 - Reactor stopped
 [2026-06-17 10:09:15.467] [INFO ] src/threadpool.c:114 - Threadpool destroyed
 [2026-06-17 10:09:15.467] [INFO ] src/client.c:85 - Client destroyed: fd=15, user=zhu, ip=10.11.7.213:40620
+[2026-06-17 10:16:00.987] [INFO ] src/main.c:134 - ========================================
+[2026-06-17 10:16:00.987] [INFO ] src/main.c:135 - IM Chat Server starting...
+[2026-06-17 10:16:00.987] [INFO ] src/main.c:136 - Configuration: port=8888, sub_reactors=4, biz_threads=4
+[2026-06-17 10:16:00.987] [INFO ] src/main.c:139 - ========================================
+[2026-06-17 10:16:00.987] [WARN ] src/ai_service.c:88 - AI service: no API key provided, AI disabled
+[2026-06-17 10:16:00.991] [INFO ] src/db.c:48 - MySQL connected: chat_app@localhost:3306
+[2026-06-17 10:16:00.993] [INFO ] src/db.c:74 - Database 'chat_db' selected
+[2026-06-17 10:16:00.994] [INFO ] src/db.c:95 - Users table ready
+[2026-06-17 10:16:00.994] [INFO ] src/db.c:128 - Database initialization complete
+[2026-06-17 10:16:00.994] [INFO ] src/client.c:15 - Client manager initialized
+[2026-06-17 10:16:00.994] [INFO ] src/threadpool.c:83 - Threadpool created with 4 threads
+[2026-06-17 10:16:00.994] [INFO ] src/reactor.c:417 - Listening on port 8888
+[2026-06-17 10:16:00.994] [INFO ] src/reactor.c:504 - Reactor initialized: 4 sub-reactors
+[2026-06-17 10:16:00.994] [INFO ] src/heartbeat.c:57 - Heartbeat started: timeout=3600s, interval=5s
+[2026-06-17 10:16:00.994] [INFO ] src/main.c:185 - Server is ready. Waiting for connections...
+[2026-06-17 10:16:00.994] [INFO ] src/main.c:186 - Press Ctrl+C to stop the server
+[2026-06-17 10:16:00.994] [INFO ] src/reactor.c:228 - Sub-reactor[0] started, epoll_fd=7
+[2026-06-17 10:16:00.994] [INFO ] src/reactor.c:228 - Sub-reactor[1] started, epoll_fd=9
+[2026-06-17 10:16:00.994] [INFO ] src/reactor.c:228 - Sub-reactor[2] started, epoll_fd=11
+[2026-06-17 10:16:00.995] [INFO ] src/reactor.c:291 - Main reactor started, listening on port (fd=5)
+[2026-06-17 10:16:00.995] [INFO ] src/reactor.c:228 - Sub-reactor[3] started, epoll_fd=13
+[2026-06-17 10:16:02.872] [INFO ] src/client.c:73 - Client created: fd=15, ip=10.11.7.213:55758
+[2026-06-17 10:16:02.872] [INFO ] src/reactor.c:357 - Accepted connection: fd=15, ip=10.11.7.213:55758 -> sub[0]
+[2026-06-17 10:16:19.935] [INFO ] src/db.c:231 - User login: zhu (admin=0, status=1)
+[2026-06-17 10:16:19.935] [INFO ] src/chat_service.c:186 - User login: zhu (fd=15, admin=0, banned=0)
+[2026-06-17 10:16:24.223] [INFO ] src/chat_service.c:415 - Public msg from zhu: 你好
+[2026-06-17 10:16:29.081] [INFO ] src/client.c:73 - Client created: fd=16, ip=127.0.0.1:47320
+[2026-06-17 10:16:29.081] [INFO ] src/reactor.c:357 - Accepted connection: fd=16, ip=127.0.0.1:47320 -> sub[1]
+[2026-06-17 10:16:44.216] [INFO ] src/db.c:231 - User login: admin (admin=1, status=1)
+[2026-06-17 10:16:44.216] [INFO ] src/chat_service.c:186 - User login: admin (fd=16, admin=1, banned=0)
+[2026-06-17 10:16:49.478] [INFO ] src/chat_service.c:415 - Public msg from zhu: 你好
+[2026-06-17 10:16:53.119] [INFO ] src/db.c:327 - User 'zhu' banned
+[2026-06-17 10:16:53.119] [INFO ] src/chat_service.c:723 - Admin 'admin' banned user 'zhu'
+[2026-06-17 10:17:08.373] [INFO ] src/reactor.c:256 - fd=15 error/hangup event
+[2026-06-17 10:17:08.373] [INFO ] src/client.c:85 - Client destroyed: fd=15, user=zhu, ip=10.11.7.213:55758
+[2026-06-17 10:17:10.561] [INFO ] src/client.c:73 - Client created: fd=15, ip=10.11.7.213:60638
+[2026-06-17 10:17:10.561] [INFO ] src/reactor.c:357 - Accepted connection: fd=15, ip=10.11.7.213:60638 -> sub[2]
+[2026-06-17 10:17:19.565] [INFO ] src/db.c:231 - User login: zhu (admin=0, status=0)
+[2026-06-17 10:17:19.565] [INFO ] src/chat_service.c:186 - User login: zhu (fd=15, admin=0, banned=1)
+[2026-06-17 10:17:30.090] [INFO ] src/db.c:327 - User 'zhu' unbanned
+[2026-06-17 10:17:30.090] [INFO ] src/chat_service.c:723 - Admin 'admin' unbanned user 'zhu'
+[2026-06-17 10:17:41.945] [INFO ] src/chat_service.c:415 - Public msg from zhu: daijiahao1
+[2026-06-17 10:20:32.024] [INFO ] src/chat_service.c:415 - Public msg from admin:  /to ai 你知道中国哪里最好玩吗
+[2026-06-17 10:20:49.426] [INFO ] src/main.c:21 - Received signal 2, shutting down...
+[2026-06-17 10:20:49.426] [INFO ] src/reactor.c:364 - Main reactor stopped
+[2026-06-17 10:20:49.426] [INFO ] src/main.c:192 - Shutting down...
+[2026-06-17 10:20:49.426] [INFO ] src/reactor.c:279 - Sub-reactor[1] stopped
+[2026-06-17 10:20:49.426] [INFO ] src/reactor.c:279 - Sub-reactor[0] stopped
+[2026-06-17 10:20:49.426] [INFO ] src/reactor.c:279 - Sub-reactor[3] stopped
+[2026-06-17 10:20:49.426] [INFO ] src/reactor.c:279 - Sub-reactor[2] stopped
+[2026-06-17 10:20:51.408] [INFO ] src/heartbeat.c:68 - Heartbeat stopped
+[2026-06-17 10:20:51.408] [INFO ] src/reactor.c:556 - Stopping reactor...
+[2026-06-17 10:20:51.408] [INFO ] src/reactor.c:587 - Reactor stopped
+[2026-06-17 10:20:51.408] [INFO ] src/threadpool.c:114 - Threadpool destroyed
+[2026-06-17 10:20:51.408] [INFO ] src/client.c:85 - Client destroyed: fd=15, user=zhu, ip=10.11.7.213:60638
+[2026-06-17 10:21:08.981] [INFO ] src/main.c:134 - ========================================
+[2026-06-17 10:21:08.981] [INFO ] src/main.c:135 - IM Chat Server starting...
+[2026-06-17 10:21:08.981] [INFO ] src/main.c:136 - Configuration: port=8888, sub_reactors=4, biz_threads=4
+[2026-06-17 10:21:08.981] [INFO ] src/main.c:138 - AI assistant: enabled (DeepSeek)
+[2026-06-17 10:21:08.981] [INFO ] src/main.c:139 - ========================================
+[2026-06-17 10:21:08.983] [INFO ] src/ai_service.c:109 - AI service initialized (DeepSeek, model=deepseek-chat)
+[2026-06-17 10:21:08.985] [INFO ] src/db.c:48 - MySQL connected: chat_app@localhost:3306
+[2026-06-17 10:21:08.989] [INFO ] src/db.c:74 - Database 'chat_db' selected
+[2026-06-17 10:21:08.991] [INFO ] src/db.c:95 - Users table ready
+[2026-06-17 10:21:08.991] [INFO ] src/db.c:128 - Database initialization complete
+[2026-06-17 10:21:08.991] [INFO ] src/client.c:15 - Client manager initialized
+[2026-06-17 10:21:08.991] [INFO ] src/threadpool.c:83 - Threadpool created with 4 threads
+[2026-06-17 10:21:08.992] [INFO ] src/reactor.c:417 - Listening on port 8888
+[2026-06-17 10:21:08.994] [INFO ] src/reactor.c:504 - Reactor initialized: 4 sub-reactors
+[2026-06-17 10:21:08.994] [INFO ] src/heartbeat.c:57 - Heartbeat started: timeout=3600s, interval=5s
+[2026-06-17 10:21:08.994] [INFO ] src/main.c:185 - Server is ready. Waiting for connections...
+[2026-06-17 10:21:08.994] [INFO ] src/main.c:186 - Press Ctrl+C to stop the server
+[2026-06-17 10:21:08.994] [INFO ] src/reactor.c:228 - Sub-reactor[0] started, epoll_fd=7
+[2026-06-17 10:21:08.995] [INFO ] src/reactor.c:228 - Sub-reactor[3] started, epoll_fd=13
+[2026-06-17 10:21:08.995] [INFO ] src/reactor.c:291 - Main reactor started, listening on port (fd=5)
+[2026-06-17 10:21:08.995] [INFO ] src/reactor.c:228 - Sub-reactor[1] started, epoll_fd=9
+[2026-06-17 10:21:08.995] [INFO ] src/reactor.c:228 - Sub-reactor[2] started, epoll_fd=11
+[2026-06-17 10:21:15.354] [INFO ] src/client.c:73 - Client created: fd=15, ip=127.0.0.1:37914
+[2026-06-17 10:21:15.354] [INFO ] src/reactor.c:357 - Accepted connection: fd=15, ip=127.0.0.1:37914 -> sub[0]
+[2026-06-17 10:21:34.022] [INFO ] src/db.c:231 - User login: qhl (admin=0, status=1)
+[2026-06-17 10:21:34.022] [INFO ] src/chat_service.c:186 - User login: qhl (fd=15, admin=0, banned=0)
+[2026-06-17 10:21:52.174] [INFO ] src/ai_service.c:183 - AI chat: Q=你知道中国哪里最好玩吗 A=这个问题要看你的喜好啦！比如喜欢历史文化可以去北京、西安、洛阳；喜�
+[2026-06-17 10:22:00.089] [INFO ] src/client.c:73 - Client created: fd=16, ip=10.11.7.213:37728
+[2026-06-17 10:22:00.089] [INFO ] src/reactor.c:357 - Accepted connection: fd=16, ip=10.11.7.213:37728 -> sub[1]
+[2026-06-17 10:22:06.146] [INFO ] src/reactor.c:256 - fd=15 error/hangup event
+[2026-06-17 10:22:06.146] [INFO ] src/client.c:85 - Client destroyed: fd=15, user=qhl, ip=127.0.0.1:37914
+[2026-06-17 10:22:13.391] [INFO ] src/db.c:231 - User login: zhu (admin=0, status=1)
+[2026-06-17 10:22:13.391] [INFO ] src/chat_service.c:186 - User login: zhu (fd=16, admin=0, banned=0)
+[2026-06-17 10:22:38.822] [INFO ] src/ai_service.c:183 - AI chat: Q=今天天气怎么样 A=抱歉，我无法获取实时天气信息。你可以查看手机上的天气应用或网站来了�
+[2026-06-17 10:22:59.723] [INFO ] src/client.c:73 - Client created: fd=15, ip=127.0.0.1:47244
+[2026-06-17 10:22:59.723] [INFO ] src/reactor.c:357 - Accepted connection: fd=15, ip=127.0.0.1:47244 -> sub[2]
+[2026-06-17 10:23:30.991] [INFO ] src/ai_service.c:183 - AI chat: Q=世界有几大洋几大洲 A=地球上共有七大洲和四大洋。
+
+**七大洲**：亚洲、非洲、北美洲、南美洲、�
+[2026-06-17 10:23:39.511] [INFO ] src/db.c:231 - User login: qhl (admin=0, status=1)
+[2026-06-17 10:23:39.512] [INFO ] src/chat_service.c:186 - User login: qhl (fd=15, admin=0, banned=0)
+[2026-06-17 10:24:02.377] [INFO ] src/ai_service.c:183 - AI chat: Q=用c语言写一个字符串的复制 A=以下是一个简单的 C 语言字符串复制函数实现，包括 `strcpy` 模拟：
+
+```c
+#incl
+[2026-06-17 10:25:17.721] [INFO ] src/ai_service.c:183 - AI chat: Q=告诉我黄土高原水土流失的治理方法 A=黄土高原水土流失的治理方法包括：
+
+1. **植树种草**：增加植被覆盖率，减�
+[2026-06-17 10:26:34.047] [INFO ] src/ai_service.c:183 - AI chat: Q=给我讲一讲天干地支，四时八柱 A=天干地支是中国古代的纪年方法。天干有10个（甲、乙、丙、丁、戊、己、�
+[2026-06-17 10:29:42.599] [INFO ] src/chat_service.c:415 - Public msg from qhl: 你好
+[2026-06-17 10:29:54.462] [INFO ] src/chat_service.c:415 - Public msg from qhl: 你是jb
+[2026-06-17 10:30:12.613] [INFO ] src/chat_service.c:415 - Public msg from qhl: 你在干什么
+[2026-06-17 10:30:18.151] [INFO ] src/chat_service.c:415 - Public msg from qhl: 你吃饭了吗
+[2026-06-17 10:30:32.071] [INFO ] src/chat_service.c:415 - Public msg from qhl: 嫖娼好玩吗
+[2026-06-17 10:30:48.349] [INFO ] src/chat_service.c:415 - Public msg from qhl: 猪乾山
+[2026-06-17 10:33:15.737] [INFO ] src/ai_service.c:183 - AI chat: Q=你知道我今天吃啥了吗 A=哈哈，我可没有千里眼，看不到你今天吃了什么呢！不过，你可以告诉我，�
+[2026-06-17 10:50:27.979] [INFO ] src/ai_service.c:183 - AI chat: Q=你喜欢吃什么 A=作为一个AI助手，我无法吃东西，但我可以帮你推荐美食！你喜欢什么口味�
+[2026-06-17 10:59:31.462] [INFO ] src/reactor.c:256 - fd=15 error/hangup event
+[2026-06-17 10:59:31.462] [INFO ] src/client.c:85 - Client destroyed: fd=15, user=qhl, ip=127.0.0.1:47244
+[2026-06-17 11:00:09.089] [INFO ] src/client.c:73 - Client created: fd=15, ip=127.0.0.1:47254
+[2026-06-17 11:00:09.089] [INFO ] src/reactor.c:357 - Accepted connection: fd=15, ip=127.0.0.1:47254 -> sub[3]
+[2026-06-17 11:00:21.695] [INFO ] src/db.c:231 - User login: qhl (admin=0, status=1)
+[2026-06-17 11:00:21.695] [INFO ] src/chat_service.c:186 - User login: qhl (fd=15, admin=0, banned=0)
+[2026-06-17 11:00:30.163] [INFO ] src/chat_service.c:415 - Public msg from qhl: nihao
+[2026-06-17 11:00:51.528] [INFO ] src/ai_service.c:183 - AI chat: Q=你在干什么 A=嗨，我正在这里等你聊天呢！你有什么问题或者想聊的吗？比如编程、生活�
+[2026-06-17 11:01:04.021] [INFO ] src/ai_service.c:183 - AI chat: Q=你都会什么 A=嗨！我是小D，你的聊天室助手。我会很多事情，比如：
+
+- **回答问题**：生�
+[2026-06-17 11:01:29.727] [INFO ] src/chat_service.c:415 - Public msg from qhl: 你好
+[2026-06-17 11:01:58.775] [INFO ] src/chat_service.c:415 - Public msg from qhl: 你在干什么
+[2026-06-17 11:02:07.487] [INFO ] src/chat_service.c:415 - Public msg from qhl: 你好吗
+[2026-06-17 11:02:53.923] [INFO ] src/ai_service.c:183 - AI chat: Q=怎么给我的朋友找对象\n你有什么窍门吗 A=哈哈，这个问题有意思！给小D一点建议，你可以试试这些方法：
+
+1. **了解�
+[2026-06-17 11:25:52.218] [INFO ] src/ai_service.c:183 - AI chat: Q=都有什么ai A=AI（人工智能）的种类很多，常见的有：
+
+1. **语音助手**：如 Siri、小爱同学
+[2026-06-17 13:05:23.736] [INFO ] src/heartbeat.c:18 - Heartbeat timeout: fd=16, user=zhu, idle=3605s
+[2026-06-17 13:05:23.767] [INFO ] src/client.c:85 - Client destroyed: fd=16, user=zhu, ip=10.11.7.213:37728
+[2026-06-17 13:59:32.094] [INFO ] src/reactor.c:256 - fd=15 error/hangup event
+[2026-06-17 13:59:32.094] [INFO ] src/client.c:85 - Client destroyed: fd=15, user=qhl, ip=127.0.0.1:47254
+[2026-06-17 14:04:15.483] [INFO ] src/main.c:21 - Received signal 2, shutting down...
+[2026-06-17 14:04:15.484] [INFO ] src/reactor.c:364 - Main reactor stopped
+[2026-06-17 14:04:15.484] [INFO ] src/main.c:192 - Shutting down...
+[2026-06-17 14:04:15.484] [INFO ] src/reactor.c:279 - Sub-reactor[0] stopped
+[2026-06-17 14:04:15.484] [INFO ] src/reactor.c:279 - Sub-reactor[2] stopped
+[2026-06-17 14:04:15.484] [INFO ] src/reactor.c:279 - Sub-reactor[1] stopped
+[2026-06-17 14:04:15.484] [INFO ] src/reactor.c:279 - Sub-reactor[3] stopped
+[2026-06-17 14:04:19.076] [INFO ] src/heartbeat.c:68 - Heartbeat stopped
+[2026-06-17 14:04:19.076] [INFO ] src/reactor.c:556 - Stopping reactor...
+[2026-06-17 14:04:19.076] [INFO ] src/reactor.c:587 - Reactor stopped
+[2026-06-17 14:04:19.076] [INFO ] src/threadpool.c:114 - Threadpool destroyed
+[2026-06-17 14:04:19.076] [INFO ] src/client.c:30 - Client manager destroyed
+[2026-06-17 14:04:19.079] [INFO ] src/db.c:137 - MySQL connection closed

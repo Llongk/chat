@@ -148,7 +148,7 @@ static int read_line(char *buf, int size)
         int ch = fgetc(stdin);
         if (ch == EOF) return -1;
         if (ch == '\n') {
-            putchar('\n');
+            printf("\r\033[K");  /* 回车时清除输入行, 不保留原始输入 */
             fflush(stdout);
             buf[pos] = '\0';
             g_input_buf[0] = '\0';

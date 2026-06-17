@@ -19,6 +19,8 @@ enum msg_type {
     MSG_REGISTER_RESP    = 0x0C,  /* 注册响应 */
     MSG_KICK_REQ         = 0x0D,  /* 管理员踢人请求 */
     MSG_KICK_RESP        = 0x0E,  /* 管理员踢人响应 */
+    MSG_BAN_REQ          = 0x0F,  /* 管理员封禁请求 */
+    MSG_BAN_RESP         = 0x10,  /* 管理员封禁响应 */
     MSG_ERROR_RESP       = 0xFF   /* 错误响应 */
 };
 

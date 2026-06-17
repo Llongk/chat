@@ -1,1 +1,62 @@
-[]
+[
+  {
+    "directory": "/home/qhl/code/chat",
+    "command": "gcc -Wall -Wextra -g -O2 -Iinclude -I/home/qhl/code/chat/mysql_dev/usr/include -c src/db.c -o obj/db.o",
+    "file": "/home/qhl/code/chat/src/db.c"
+  },
+  {
+    "directory": "/home/qhl/code/chat",
+    "command": "gcc -Wall -Wextra -g -O2 -Iinclude -I/home/qhl/code/chat/mysql_dev/usr/include -c src/main.c -o obj/main.o",
+    "file": "/home/qhl/code/chat/src/main.c"
+  },
+  {
+    "directory": "/home/qhl/code/chat",
+    "command": "gcc -Wall -Wextra -g -O2 -Iinclude -I/home/qhl/code/chat/mysql_dev/usr/include -c src/client_main.c -o obj/client_main.o",
+    "file": "/home/qhl/code/chat/src/client_main.c"
+  },
+  {
+    "directory": "/home/qhl/code/chat",
+    "command": "gcc -Wall -Wextra -g -O2 -Iinclude -I/home/qhl/code/chat/mysql_dev/usr/include -c src/chat_service.c -o obj/chat_service.o",
+    "file": "/home/qhl/code/chat/src/chat_service.c"
+  },
+  {
+    "directory": "/home/qhl/code/chat",
+    "command": "gcc -Wall -Wextra -g -O2 -Iinclude -I/home/qhl/code/chat/mysql_dev/usr/include -c src/ai_service.c -o obj/ai_service.o",
+    "file": "/home/qhl/code/chat/src/ai_service.c"
+  },
+  {
+    "directory": "/home/qhl/code/chat",
+    "command": "gcc -Wall -Wextra -g -O2 -Iinclude -I/home/qhl/code/chat/mysql_dev/usr/include -c src/reactor.c -o obj/reactor.o",
+    "file": "/home/qhl/code/chat/src/reactor.c"
+  },
+  {
+    "directory": "/home/qhl/code/chat",
+    "command": "gcc -Wall -Wextra -g -O2 -Iinclude -I/home/qhl/code/chat/mysql_dev/usr/include -c src/heartbeat.c -o obj/heartbeat.o",
+    "file": "/home/qhl/code/chat/src/heartbeat.c"
+  },
+  {
+    "directory": "/home/qhl/code/chat",
+    "command": "gcc -Wall -Wextra -g -O2 -Iinclude -I/home/qhl/code/chat/mysql_dev/usr/include -c src/ratelimit.c -o obj/ratelimit.o",
+    "file": "/home/qhl/code/chat/src/ratelimit.c"
+  },
+  {
+    "directory": "/home/qhl/code/chat",
+    "command": "gcc -Wall -Wextra -g -O2 -Iinclude -I/home/qhl/code/chat/mysql_dev/usr/include -c src/threadpool.c -o obj/threadpool.o",
+    "file": "/home/qhl/code/chat/src/threadpool.c"
+  },
+  {
+    "directory": "/home/qhl/code/chat",
+    "command": "gcc -Wall -Wextra -g -O2 -Iinclude -I/home/qhl/code/chat/mysql_dev/usr/include -c src/ringbuf.c -o obj/ringbuf.o",
+    "file": "/home/qhl/code/chat/src/ringbuf.c"
+  },
+  {
+    "directory": "/home/qhl/code/chat",
+    "command": "gcc -Wall -Wextra -g -O2 -Iinclude -I/home/qhl/code/chat/mysql_dev/usr/include -c src/client.c -o obj/client.o",
+    "file": "/home/qhl/code/chat/src/client.c"
+  },
+  {
+    "directory": "/home/qhl/code/chat",
+    "command": "gcc -Wall -Wextra -g -O2 -Iinclude -I/home/qhl/code/chat/mysql_dev/usr/include -c src/logger.c -o obj/logger.o",
+    "file": "/home/qhl/code/chat/src/logger.c"
+  }
+]

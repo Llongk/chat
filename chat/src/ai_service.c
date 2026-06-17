@@ -133,7 +133,7 @@ int ai_chat(const char *user_msg, char *reply, size_t reply_size)
         "-d '{\"model\":\"%s\",\"messages\":["
         "{\"role\":\"system\",\"content\":\"%s\"},"
         "{\"role\":\"user\",\"content\":\"%s\"}"
-        "],\"max_tokens\":1024}' 2>/dev/null",
+        "],\"max_tokens\":2048}' 2>/dev/null",
         AI_TIMEOUT_SEC, AI_API_URL, g_api_key,
         AI_MODEL, escaped_sys, escaped_msg);
 
@@ -145,8 +145,8 @@ int ai_chat(const char *user_msg, char *reply, size_t reply_size)
         return -1;
     }
 
-    /* 读取完整响应 (最大 8KB) */
-    char response[8192] = "";
+    /* 读取完整响应 (最大 16KB) */
+    char response[16384] = "";
     size_t total = 0;
     char buf[1024];
     while (fgets(buf, sizeof(buf), fp)) {

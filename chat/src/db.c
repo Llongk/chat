@@ -228,11 +228,6 @@ int db_user_login(const char *username, const char *password,
 
     mysql_free_result(res);
 
-    /* 检查用户状态 */
-    if (user_status == 0) {
-        return -2;  /* 账号已被封禁 */
-    }
-
     LOG_INFO("User login: %s (admin=%d, status=%d)",
              username, admin_flag, user_status);
     return 0;

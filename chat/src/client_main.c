@@ -6,6 +6,7 @@
 #include "common.h"
 #include "protocol.h"
 #include <sys/ioctl.h>
+#include <termios.h>
 
 #define RECV_BUF_SIZE (64 * 1024)
 
@@ -28,6 +29,28 @@ static char           g_username[MAX_USERNAME_LEN];
 static int            g_logged_in = 0;
 static int            g_is_admin  = 0;
 static pthread_mutex_t g_send_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t g_print_mutex = PTHREAD_MUTEX_INITIALIZER;  /* 输出互斥锁 */
+static char           g_input_buf[MAX_MSG_LEN] = "";  /* 当前正在输入的内容 */
+static volatile int   g_needs_redraw = 0;  /* 接收线程打印后需要重绘输入行 */
+static struct termios  g_orig_termios;  /* 原始终端配置, 退出时恢复 */
+
+/* 恢复终端为原始模式 (退出时自动调用) */
+static void restore_terminal(void)
+{
+    tcsetattr(STDIN_FILENO, TCSANOW, &g_orig_termios);
+}
+
+/* 设置终端为非规范模式: 逐字符输入, 关闭回显 (由程序控制显示) */
+static void setup_terminal(void)
+{
+    tcgetattr(STDIN_FILENO, &g_orig_termios);
+    atexit(restore_terminal);
+    struct termios raw = g_orig_termios;
+    raw.c_lflag &= ~(ICANON | ECHO);
+    raw.c_cc[VMIN]  = 1;
+    raw.c_cc[VTIME] = 0;
+    tcsetattr(STDIN_FILENO, TCSANOW, &raw);
+}
 
 /* ══════════════════════════════════════════
  *  工具函数
@@ -72,9 +95,109 @@ static void print_prompt(void)
     fflush(stdout);
 }
 
+/* 计算 UTF-8 字符的可视列宽: 中文/日文/韩文=2, 其他=1 */
+static int utf8_char_width(const unsigned char *s, int len)
+{
+    if (len >= 3 && s[0] >= 0xE0 && s[0] <= 0xEF) return 2;  /* 中日韩 */
+    if (len >= 2 && s[0] >= 0xC0 && s[0] <= 0xDF) return 1;  /* 2字节 */
+    return 1;  /* ASCII */
+}
+
+/* 回退到上一个 UTF-8 字符起始位置, 返回被删掉的字节数 */
+static int utf8_backspace(char *buf, int pos)
+{
+    if (pos <= 0) return 0;
+    int orig = pos;
+    pos--;  /* 回退一字节 */
+    /* 跳过所有 UTF-8 延续字节 (10xxxxxx) */
+    while (pos > 0 && ((unsigned char)buf[pos] & 0xC0) == 0x80)
+        pos--;
+    return orig - pos;
+}
+
+/* 去除字符串末尾的空白字符 */
+static void trim_trailing(char *s)
+{
+    int len = (int)strlen(s);
+    while (len > 0 && (s[len-1] == ' ' || s[len-1] == '\t'))
+        s[--len] = '\0';
+}
+
+/* 逐字符读取一行输入, 支持 UTF-8 中文退格, 同时维护 g_input_buf 供接收线程重绘 */
+static int read_line(char *buf, int size)
+{
+    int pos = 0;
+    while (pos < size - 1) {
+        /* 如果接收线程打印了消息, 需要重绘输入行 */
+        if (g_needs_redraw) {
+            g_needs_redraw = 0;
+            pthread_mutex_lock(&g_print_mutex);
+            printf("\r\033[K");
+            print_prompt();
+            if (pos > 0) {
+                memcpy(g_input_buf, buf, pos);
+                g_input_buf[pos] = '\0';
+                printf("%.*s", pos, buf);
+            } else {
+                g_input_buf[0] = '\0';
+            }
+            fflush(stdout);
+            pthread_mutex_unlock(&g_print_mutex);
+        }
+
+        int ch = fgetc(stdin);
+        if (ch == EOF) return -1;
+        if (ch == '\n') {
+            putchar('\n');
+            fflush(stdout);
+            buf[pos] = '\0';
+            g_input_buf[0] = '\0';
+            return pos;
+        }
+        if (ch == 127 || ch == 8) {  /* Backspace */
+            int del = utf8_backspace(buf, pos);
+            if (del > 0) {
+                /* 计算被删字符的可视宽度 */
+                int cw = utf8_char_width((unsigned char *)(buf + pos - del), del);
+                pos -= del;
+                g_input_buf[pos] = '\0';
+                /* 终端擦除: 光标回退 + 清除显示 */
+                if (cw >= 2)
+                    printf("\b\b  \b\b");
+                else
+                    printf("\b \b");
+                fflush(stdout);
+            }
+            continue;
+        }
+        if (ch == 27) {  /* ESC: 跳过方向键/功能键的转义序列 */
+            int next = fgetc(stdin);
+            if (next == '[' || next == 'O') {
+                /* 消费后续字符直到序列结束 */
+                while (1) {
+                    int c = fgetc(stdin);
+                    if (c == EOF || (c >= 0x40 && c <= 0x7E)) break;
+                }
+            }
+            /* ungetc 无效, 直接忽略整个序列 */
+            continue;
+        }
+        if (ch < 32) continue;  /* 忽略其他控制字符 */
+        buf[pos] = (char)ch;
+        g_input_buf[pos] = (char)ch;  /* 同步更新 */
+        pos++;
+        g_input_buf[pos] = '\0';
+        putchar(ch);
+        fflush(stdout);
+    }
+    buf[pos] = '\0';
+    g_input_buf[0] = '\0';
+    return pos;
+}
+
 /* ── JSON 字段提取 ── */
 
-/* 从 JSON 字符串中提取指定 key 的字符串值 */
+/* 从 JSON 字符串中提取指定 key 的字符串值 (支持转义字符) */
 static int json_get_str(const char *json, const char *key,
                         char *out, size_t out_size)
 {
@@ -83,9 +206,15 @@ static int json_get_str(const char *json, const char *key,
     const char *start = strstr(json, search);
     if (!start) return -1;
     start += strlen(search);
-    const char *end = strchr(start, '"');
-    if (!end) return -1;
-    size_t len = (size_t)(end - start);
+    /* 正确跳过转义序列 (如 \" \\ \n 等), 找到真正的结束引号 */
+    const char *p = start;
+    while (*p) {
+        if (*p == '\\' && *(p + 1)) { p += 2; continue; }  /* 跳过转义 */
+        if (*p == '"') break;  /* 真正的结束引号 */
+        p++;
+    }
+    if (!*p) return -1;
+    size_t len = (size_t)(p - start);
     if (len >= out_size) len = out_size - 1;
     memcpy(out, start, len);
     out[len] = '\0';
@@ -101,14 +230,19 @@ static int json_get_int(const char *json, const char *key)
     return p ? atoi(p + strlen(search)) : 0;
 }
 
-/* 将字面量 \n (反斜杠+n) 转换为真正的换行符, 原地修改 */
+/* 将 JSON 转义序列还原为真实字符 (\n→换行, \"→引号, \\\→反斜杠) */
 static void convert_newlines(char *s)
 {
     char *r = s, *w = s;
     while (*r) {
-        if (*r == '\\' && *(r + 1) == 'n') {
-            *w++ = '\n';
-            r += 2;
+        if (*r == '\\' && *(r + 1)) {
+            switch (*(r + 1)) {
+            case 'n':  *w++ = '\n'; r += 2; break;
+            case '"':  *w++ = '"';  r += 2; break;
+            case '\\': *w++ = '\\'; r += 2; break;
+            case 't':  *w++ = '\t'; r += 2; break;
+            default:   *w++ = *r++;  break;
+            }
         } else {
             *w++ = *r++;
         }
@@ -150,7 +284,7 @@ static int parse_user_pass(const char *rest, char *user, char *pass, size_t sz)
  *  msg:    消息内容 (支持长文本自动换行)
  * ══════════════════════════════════════════ */
 
-#define MAX_BUBBLE_LINES 64
+#define MAX_BUBBLE_LINES 256
 
 static void draw_bubble(int align, const char *color,
                         const char *label, const char *msg)
@@ -337,7 +471,7 @@ static void handle_public_broadcast(const char *body, const char *time_str)
 /* 处理私聊消息 */
 static void handle_private_resp(const char *body, const char *time_str)
 {
-    char from[64] = "", msg[4096] = "", status[32] = "";
+    char from[64] = "", msg[16384] = "", status[32] = "";
     json_get_str(body, "from", from, sizeof(from));
     json_get_str(body, "msg",  msg,  sizeof(msg));
     json_get_str(body, "status", status, sizeof(status));
@@ -496,6 +630,10 @@ static void *receiver_thread(void *arg)
             buf_len -= total_len;
             get_time_str(time_str, sizeof(time_str));
 
+            /* 锁定输出, 清除输入行, 处理消息 */
+            pthread_mutex_lock(&g_print_mutex);
+            printf("\r\033[K");  /* 清除当前输入行 */
+
             /* 按消息类型分发处理 */
             switch (hdr.type) {
             case MSG_PUBLIC_BROADCAST: handle_public_broadcast(body, time_str); break;
@@ -503,6 +641,7 @@ static void *receiver_thread(void *arg)
             case MSG_LOGIN_RESP:       handle_login_resp(body);                 break;
             case MSG_REGISTER_RESP:    handle_status_resp(body, "注册成功! 请使用 /login 登录", "✓"); break;
             case MSG_KICK_RESP:        handle_status_resp(body, "操作成功", "✓"); break;
+            case MSG_BAN_RESP:         handle_status_resp(body, "操作成功", "✓"); break;
             case MSG_ONLINE_LIST_RESP: handle_online_list(body);                break;
             case MSG_ERROR_RESP: {
                 char msg[256] = "";
@@ -514,7 +653,17 @@ static void *receiver_thread(void *arg)
             case MSG_HEARTBEAT_RESP: break;  /* 静默 */
             default: break;
             }
+
             fflush(stdout);
+
+            /* 立即重绘提示符 + 已输入的内容 */
+            print_prompt();
+            if (g_input_buf[0]) {
+                printf("%s", g_input_buf);
+                fflush(stdout);
+            }
+            g_needs_redraw = 0;
+            pthread_mutex_unlock(&g_print_mutex);
         }
     }
     return NULL;
@@ -540,25 +689,92 @@ static void *heartbeat_thread(void *arg)
 static void show_welcome(const char *ip, int port)
 {
     printf("\033[2J\033[H");
-    int pad = (get_term_width() - 40) / 2;
+    int tw = get_term_width();
+    const int BOX = 46;  /* 边框总宽: │ + 44列内容 + │ */
+    int pad = (tw - BOX) / 2;
     if (pad < 0) pad = 0;
-    printf("\n\n");
-    printf("%*s" CLR_CYAN CLR_BOLD "════════════════════════════════" CLR_RESET "\n", pad, "");
-    printf("%*s" CLR_CYAN CLR_BOLD "    💬  IM 聊天室  客户端       " CLR_RESET "\n", pad, "");
-    printf("%*s" CLR_CYAN CLR_BOLD "════════════════════════════════" CLR_RESET "\n", pad, "");
+
+    /* ── 顶部标题区 ── */
     printf("\n");
-    printf("%*s" CLR_DIM "%s:%d" CLR_RESET "\n\n", pad + 4, "", ip, port);
-    printf("%*s" CLR_CYAN "/register" CLR_RESET " <用户> <密码>    注册\n", pad, "");
-    printf("%*s" CLR_CYAN "/login" CLR_RESET "    <用户> <密码>    登录\n", pad, "");
+    printf(CLR_CYAN);
+    for (int i = 0; i < tw; i++) printf("━");
+    printf(CLR_RESET "\n");
+
+    /* 标题居中 */
+    const char *title = "💬  IM Chat Room  💬";
+    int tpad = (tw - 24) / 2;
+    if (tpad < 0) tpad = 0;
+    printf("%*s" CLR_BOLD CLR_CYAN "%s" CLR_RESET "\n", tpad, "", title);
+
+    /* 副标题 */
+    const char *sub = "High-Performance · Multi-Thread · AI Powered";
+    int spad = (tw - (int)strlen(sub)) / 2;
+    if (spad < 0) spad = 0;
+    printf("%*s" CLR_DIM "%s" CLR_RESET "\n", spad, "", sub);
+
+    printf(CLR_CYAN);
+    for (int i = 0; i < tw; i++) printf("━");
+    printf(CLR_RESET "\n");
+
+    /* 连接信息居中 */
+    char conn[128];
+    snprintf(conn, sizeof(conn), "🔗  %s:%d", ip, port);
+    int cpad = (tw - (int)strlen(conn)) / 2;
+    if (cpad < 0) cpad = 0;
+    printf("\n%*s" CLR_GREEN CLR_BOLD "%s" CLR_RESET "\n", cpad, "", conn);
+
     printf("\n");
-    printf("%*s" CLR_GREEN "直接输入" CLR_RESET "                  公屏消息\n", pad, "");
-    printf("%*s" CLR_YELLOW "/to" CLR_RESET "      <用户> <消息>    私聊\n", pad, "");
-    printf("%*s" CLR_BOLD CLR_MAGENTA "/to AI" CLR_RESET "   <消息>            AI 助手\n", pad, "");
-    printf("%*s" CLR_MAGENTA "/online" CLR_RESET "                   在线列表\n", pad, "");
+
+    /* ═══ 账户操作 ═══ */
+    printf("%*s" CLR_BOLD CLR_BLUE "┌─ 账户操作 ", pad, "");
+    for (int i = 12; i < BOX - 1; i++) printf("─");
+    printf("┐" CLR_RESET "\n");
+
+    printf("%*s  " CLR_BOLD CLR_CYAN "/register" CLR_RESET "  <用户> <密码>      注册新账号\n", pad, "");
+    printf("%*s  " CLR_BOLD CLR_CYAN "/login" CLR_RESET "     <用户> <密码>      登录已有账号\n", pad, "");
+
+    printf("%*s" CLR_BOLD CLR_BLUE "└", pad, "");
+    for (int i = 1; i < BOX - 1; i++) printf("─");
+    printf("┘" CLR_RESET "\n");
+
     printf("\n");
-    printf("%*s" CLR_RED "/kick" CLR_RESET "      <用户>          踢人\n", pad, "");
-    printf("%*s" CLR_RED "/quit" CLR_RESET "                       退出\n", pad, "");
-    printf("\n\n");
+
+    /* ═══ 消息交互 ═══ */
+    printf("%*s" CLR_BOLD CLR_GREEN "┌─ 消息交互 ", pad, "");
+    for (int i = 12; i < BOX - 1; i++) printf("─");
+    printf("┐" CLR_RESET "\n");
+
+    printf("%*s  " CLR_BOLD CLR_WHITE "直接输入" CLR_RESET "   <消息>              发送公屏消息\n", pad, "");
+    printf("%*s  " CLR_BOLD CLR_YELLOW "/to" CLR_RESET "        <用户> <消息>      发送私聊消息\n", pad, "");
+    printf("%*s  " CLR_BOLD CLR_MAGENTA "/to AI" CLR_RESET "     <消息>              AI 智能助手\n", pad, "");
+    printf("%*s  " CLR_BOLD CLR_CYAN "/online" CLR_RESET "                         查看在线列表\n", pad, "");
+
+    printf("%*s" CLR_BOLD CLR_GREEN "└", pad, "");
+    for (int i = 1; i < BOX - 1; i++) printf("─");
+    printf("┘" CLR_RESET "\n");
+
+    printf("\n");
+
+    /* ═══ 管理功能 ═══ */
+    printf("%*s" CLR_BOLD CLR_RED "┌─ 管理功能 ", pad, "");
+    for (int i = 12; i < BOX - 1; i++) printf("─");
+    printf("┐" CLR_RESET "\n");
+
+    printf("%*s  " CLR_BOLD CLR_RED "/kick" CLR_RESET "      <用户>              踢出指定用户\n", pad, "");
+    printf("%*s  " CLR_BOLD CLR_RED "/ban" CLR_RESET "       <用户>              封禁指定用户\n", pad, "");
+    printf("%*s  " CLR_BOLD CLR_RED "/unban" CLR_RESET "     <用户>              解封指定用户\n", pad, "");
+    printf("%*s  " CLR_BOLD CLR_RED "/quit" CLR_RESET "                           退出客户端\n", pad, "");
+
+    printf("%*s" CLR_BOLD CLR_RED "└", pad, "");
+    for (int i = 1; i < BOX - 1; i++) printf("─");
+    printf("┘" CLR_RESET "\n");
+
+    /* 底部提示 */
+    printf("\n");
+    const char *tip = "输入命令后按回车发送  ·  /help 查看帮助";
+    int tip_pad = (tw - 42) / 2;
+    if (tip_pad < 0) tip_pad = 0;
+    printf("%*s" CLR_DIM "%s" CLR_RESET "\n\n", tip_pad, "", tip);
 }
 
 /* ══════════════════════════════════════════
@@ -592,6 +808,7 @@ int main(int argc, char *argv[])
     }
 
     signal(SIGPIPE, SIG_IGN);
+    setup_terminal();  /* 切换到非规范模式, 支持逐字符读取 */
     show_welcome(server_ip, port);
 
     /* 启动接收线程 */
@@ -602,14 +819,16 @@ int main(int argc, char *argv[])
     char input[MAX_MSG_LEN];
     print_prompt();
 
-    while (g_running && fgets(input, sizeof(input), stdin)) {
-        size_t len = strlen(input);
-        if (len > 0 && input[len - 1] == '\n') input[len - 1] = '\0';
+    while (g_running && read_line(input, sizeof(input)) >= 0) {
         if (input[0] == '\0') { print_prompt(); continue; }
+
+        /* 处理命令期间加锁, 防止接收线程输出干扰 */
+        pthread_mutex_lock(&g_print_mutex);
 
         /* /quit - 退出 */
         if (strcmp(input, "/quit") == 0) {
             g_running = 0;
+            pthread_mutex_unlock(&g_print_mutex);
             break;
         }
 
@@ -618,8 +837,9 @@ int main(int argc, char *argv[])
             printf("\n");
             printf(CLR_DIM "  账号" CLR_RESET "  /register /login\n");
             printf(CLR_DIM "  聊天" CLR_RESET "  直接输入文字 /to /to AI /online\n");
-            printf(CLR_DIM "  管理" CLR_RESET "  /kick /quit\n\n");
+            printf(CLR_DIM "  管理" CLR_RESET "  /kick /ban /unban /quit\n\n");
             print_prompt();
+            pthread_mutex_unlock(&g_print_mutex);
             continue;
         }
 
@@ -636,6 +856,7 @@ int main(int argc, char *argv[])
                 printf(CLR_DIM "       注册中..." CLR_RESET "\n");
             }
             print_prompt();
+            pthread_mutex_unlock(&g_print_mutex);
             continue;
         }
 
@@ -650,6 +871,7 @@ int main(int argc, char *argv[])
                 if (parse_user_pass(rest, user, pass, MAX_USERNAME_LEN) < 0) {
                     printf(CLR_RED "  ✗ 用法: /login <用户名> <密码>" CLR_RESET "\n");
                     print_prompt();
+                    pthread_mutex_unlock(&g_print_mutex);
                     continue;
                 }
             } else {
@@ -667,21 +889,76 @@ int main(int argc, char *argv[])
                 printf(CLR_DIM "       登录中..." CLR_RESET "\n");
             }
             print_prompt();
+            pthread_mutex_unlock(&g_print_mutex);
             continue;
         }
 
         /* /kick <用户名> */
         if (strncmp(input, "/kick ", 6) == 0) {
-            const char *target = input + 6;
-            while (*target == ' ') target++;
-            if (target[0] == '\0') {
-                printf(CLR_RED "  ✗ 用法: /kick <用户名>" CLR_RESET "\n");
+            if (!g_is_admin) {
+                printf(CLR_RED "  ✗ 仅管理员可执行此操作" CLR_RESET "\n");
             } else {
-                char body[256];
-                snprintf(body, sizeof(body), "{\"username\":\"%s\"}", target);
-                send_packet(MSG_KICK_REQ, (const uint8_t *)body, strlen(body));
+                const char *target = input + 6;
+                while (*target == ' ') target++;
+                if (target[0] == '\0') {
+                    printf(CLR_RED "  ✗ 用法: /kick <用户名>" CLR_RESET "\n");
+                } else {
+                    char clean[MAX_USERNAME_LEN];
+                    safe_strncpy(clean, target, MAX_USERNAME_LEN);
+                    trim_trailing(clean);
+                    char body[256];
+                    snprintf(body, sizeof(body), "{\"username\":\"%s\"}", clean);
+                    send_packet(MSG_KICK_REQ, (const uint8_t *)body, strlen(body));
+                }
             }
             print_prompt();
+            pthread_mutex_unlock(&g_print_mutex);
+            continue;
+        }
+
+        /* /ban <用户名> - 封禁用户 */
+        if (strncmp(input, "/ban ", 5) == 0) {
+            if (!g_is_admin) {
+                printf(CLR_RED "  ✗ 仅管理员可执行此操作" CLR_RESET "\n");
+            } else {
+                const char *target = input + 5;
+                while (*target == ' ') target++;
+                if (target[0] == '\0') {
+                    printf(CLR_RED "  ✗ 用法: /ban <用户名>" CLR_RESET "\n");
+                } else {
+                    char clean[MAX_USERNAME_LEN];
+                    safe_strncpy(clean, target, MAX_USERNAME_LEN);
+                    trim_trailing(clean);
+                    char body[256];
+                    snprintf(body, sizeof(body), "{\"username\":\"%s\",\"ban\":1}", clean);
+                    send_packet(MSG_BAN_REQ, (const uint8_t *)body, strlen(body));
+                }
+            }
+            print_prompt();
+            pthread_mutex_unlock(&g_print_mutex);
+            continue;
+        }
+
+        /* /unban <用户名> - 解封用户 */
+        if (strncmp(input, "/unban ", 7) == 0) {
+            if (!g_is_admin) {
+                printf(CLR_RED "  ✗ 仅管理员可执行此操作" CLR_RESET "\n");
+            } else {
+                const char *target = input + 7;
+                while (*target == ' ') target++;
+                if (target[0] == '\0') {
+                    printf(CLR_RED "  ✗ 用法: /unban <用户名>" CLR_RESET "\n");
+                } else {
+                    char clean[MAX_USERNAME_LEN];
+                    safe_strncpy(clean, target, MAX_USERNAME_LEN);
+                    trim_trailing(clean);
+                    char body[256];
+                    snprintf(body, sizeof(body), "{\"username\":\"%s\",\"ban\":0}", clean);
+                    send_packet(MSG_BAN_REQ, (const uint8_t *)body, strlen(body));
+                }
+            }
+            print_prompt();
+            pthread_mutex_unlock(&g_print_mutex);
             continue;
         }
 
@@ -689,6 +966,7 @@ int main(int argc, char *argv[])
         if (strcmp(input, "/online") == 0) {
             send_packet(MSG_ONLINE_LIST_REQ, NULL, 0);
             print_prompt();
+            pthread_mutex_unlock(&g_print_mutex);
             continue;
         }
 
@@ -700,6 +978,7 @@ int main(int argc, char *argv[])
             if (!space) {
                 printf(CLR_RED "  ✗ 用法: /to <用户名> <消息>" CLR_RESET "\n");
                 print_prompt();
+                pthread_mutex_unlock(&g_print_mutex);
                 continue;
             }
             char target[MAX_USERNAME_LEN];
@@ -726,6 +1005,7 @@ int main(int argc, char *argv[])
             get_time_str(t_str, sizeof(t_str));
             show_self_private(target, msg_copy, t_str);
             print_prompt();
+            pthread_mutex_unlock(&g_print_mutex);
             continue;
         }
 
@@ -738,6 +1018,7 @@ int main(int argc, char *argv[])
         if (g_logged_in && msg_text[0])
             send_packet(MSG_PUBLIC_MSG, (const uint8_t *)msg_text, strlen(msg_text));
         print_prompt();
+        pthread_mutex_unlock(&g_print_mutex);
     }
 
     /* 清理资源 */

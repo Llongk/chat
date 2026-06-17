@@ -170,13 +170,6 @@ static void handle_login(chat_task_t *task)
         return;
     }
 
-    if (login_ret == -2) {
-        const char *err = "{\"status\":\"error\",\"msg\":\"account banned, contact admin\"}";
-        chat_send_message(task->fd, MSG_LOGIN_RESP,
-                          (const uint8_t *)err, strlen(err));
-        return;
-    }
-
     if (login_ret != 0) {
         const char *err = "{\"status\":\"error\",\"msg\":\"wrong password\"}";
         chat_send_message(task->fd, MSG_LOGIN_RESP,
@@ -184,12 +177,14 @@ static void handle_login(chat_task_t *task)
         return;
     }
 
-    /* 标记登录 */
+    /* 标记登录 (被封用户也可登录, 但会被标记为禁言) */
     client_t *cli = client_find_by_fd(task->fd);
     if (cli) {
         client_set_logged_in(cli, username);
         cli->is_admin = is_admin;
-        LOG_INFO("User login: %s (fd=%d, admin=%d)", username, task->fd, is_admin);
+        cli->is_banned = (user_status == 0) ? 1 : 0;
+        LOG_INFO("User login: %s (fd=%d, admin=%d, banned=%d)",
+                 username, task->fd, is_admin, cli->is_banned);
     }
 
     /* 更新最后登录时间 */
@@ -382,6 +377,14 @@ static void handle_public_msg(chat_task_t *task)
         return;
     }
 
+    /* 禁言检查 */
+    if (cli->is_banned) {
+        const char *err = "{\"status\":\"error\",\"msg\":\"\u8d26\u53f7\u5df2\u88ab\u7981\u8a00\uff0c\u8bf7\u8054\u7cfb\u7ba1\u7406\u5458\"}";
+        chat_send_message(task->fd, MSG_ERROR_RESP,
+                          (const uint8_t *)err, strlen(err));
+        return;
+    }
+
     /* 限流检查 */
     if (ratelimit_check(cli, RATE_LIMIT_CAPACITY, RATE_LIMIT_RATE) != 0) {
         const char *err = "{\"status\":\"error\",\"msg\":\"rate limited, slow down\"}";
@@ -429,6 +432,14 @@ static void handle_private_msg(chat_task_t *task)
     client_t *cli = client_find_by_fd(task->fd);
     if (!cli || !cli->logged_in) {
         const char *err = "{\"status\":\"error\",\"msg\":\"please login first\"}";
+        chat_send_message(task->fd, MSG_ERROR_RESP,
+                          (const uint8_t *)err, strlen(err));
+        return;
+    }
+
+    /* 禁言检查 */
+    if (cli->is_banned) {
+        const char *err = "{\"status\":\"error\",\"msg\":\"\u8d26\u53f7\u5df2\u88ab\u7981\u8a00\uff0c\u8bf7\u8054\u7cfb\u7ba1\u7406\u5458\"}";
         chat_send_message(task->fd, MSG_ERROR_RESP,
                           (const uint8_t *)err, strlen(err));
         return;
@@ -495,7 +506,7 @@ static void handle_private_msg(chat_task_t *task)
 
     /* ═══ AI 助手特殊处理 ═══ */
     /* 如果目标是 AI 助手, 调用大模型 API 获取回复 */
-    if (strcmp(target_name, "AI") == 0 || strcmp(target_name, "小D") == 0) {
+    if (strcmp(target_name, "AI") == 0 || strcmp(target_name, "ai") == 0 || strcmp(target_name, "Ai") == 0 || strcmp(target_name, "小D") == 0) {
         if (!ai_is_ready()) {
             const char *err = "{\"status\":\"error\",\"msg\":\"AI 服务未启用 (服务端需要配置 --ai-key)\"}";
             chat_send_message(task->fd, MSG_PRIVATE_RESP,
@@ -614,6 +625,104 @@ static void handle_heartbeat(chat_task_t *task)
                       (const uint8_t *)pong, strlen(pong));
 }
 
+/* 处理管理员封禁/解封请求 */
+static void handle_ban(chat_task_t *task)
+{
+    client_t *cli = client_find_by_fd(task->fd);
+    if (!cli || !cli->logged_in || !cli->is_admin) {
+        const char *err = "{\"status\":\"error\",\"msg\":\"admin only\"}";
+        chat_send_message(task->fd, MSG_BAN_RESP,
+                          (const uint8_t *)err, strlen(err));
+        return;
+    }
+
+    /* 解析目标用户名和操作类型 */
+    char target[MAX_USERNAME_LEN];
+    memset(target, 0, sizeof(target));
+
+    char *t_start = strstr((char *)task->body, "\"username\":\"");
+    if (t_start) {
+        t_start += 12;
+        char *t_end = strchr(t_start, '"');
+        if (t_end) {
+            size_t len = (size_t)(t_end - t_start);
+            if (len >= MAX_USERNAME_LEN) len = MAX_USERNAME_LEN - 1;
+            memcpy(target, t_start, len);
+        }
+    }
+
+    /* 解析操作: ban=1 封禁, ban=0 解封 */
+    int do_ban = 1;
+    char *ban_start = strstr((char *)task->body, "\"ban\":");
+    if (ban_start) {
+        do_ban = atoi(ban_start + 6);
+    }
+
+    if (strlen(target) == 0) {
+        const char *err = "{\"status\":\"error\",\"msg\":\"\u7528\u6cd5: /ban <\u7528\u6237\u540d> 或 /unban <\u7528\u6237\u540d>\"}";
+        chat_send_message(task->fd, MSG_BAN_RESP,
+                          (const uint8_t *)err, strlen(err));
+        return;
+    }
+
+    /* 不能封禁自己 */
+    if (strcmp(target, cli->username) == 0) {
+        const char *err = "{\"status\":\"error\",\"msg\":\"\u4e0d\u80fd\u5c01\u7981\u81ea\u5df1\"}";
+        chat_send_message(task->fd, MSG_BAN_RESP,
+                          (const uint8_t *)err, strlen(err));
+        return;
+    }
+
+    /* 执行封禁/解封 */
+    int ret = db_user_set_ban(target, do_ban);
+    char resp[512];
+    if (ret == ERR_NOT_FOUND) {
+        snprintf(resp, sizeof(resp),
+                 "{\"status\":\"error\",\"msg\":\"\u7528\u6237 '%s' \u4e0d\u5b58\u5728\"}",
+                 target);
+        chat_send_message(task->fd, MSG_BAN_RESP,
+                          (const uint8_t *)resp, strlen(resp));
+        return;
+    }
+    if (ret != 0) {
+        snprintf(resp, sizeof(resp),
+                 "{\"status\":\"error\",\"msg\":\"\u5c01\u7981\u64cd\u4f5c\u5931\u8d25\"}");
+        chat_send_message(task->fd, MSG_BAN_RESP,
+                          (const uint8_t *)resp, strlen(resp));
+        return;
+    }
+
+    /* 如果封禁且目标在线, 更新禁言状态并发送提示 (不踢下线) */
+    if (do_ban) {
+        client_t *target_cli = client_find_by_name(target);
+        if (target_cli && target_cli->logged_in) {
+            client_set_banned(target_cli, 1);
+            const char *banned_msg = "{\"type\":\"system\",\"msg\":\"\u4f60\u5df2\u88ab\u7ba1\u7406\u5458\u7981\u8a00\uff0c\u8bf7\u8054\u7cfb\u7ba1\u7406\u5458\"}";
+            chat_send_message(target_cli->fd, MSG_ERROR_RESP,
+                              (const uint8_t *)banned_msg, strlen(banned_msg));
+        }
+        snprintf(resp, sizeof(resp),
+                 "{\"status\":\"ok\",\"msg\":\"\u5df2\u7981\u8a00\u7528\u6237 '%s'\"}",
+                 target);
+    } else {
+        client_t *target_cli = client_find_by_name(target);
+        if (target_cli && target_cli->logged_in) {
+            client_set_banned(target_cli, 0);
+            const char *unban_msg = "{\"type\":\"system\",\"msg\":\"\u7ba1\u7406\u5458\u5df2\u89e3\u9664\u4f60\u7684\u7981\u8a00\"}";
+            chat_send_message(target_cli->fd, MSG_ERROR_RESP,
+                              (const uint8_t *)unban_msg, strlen(unban_msg));
+        }
+        snprintf(resp, sizeof(resp),
+                 "{\"status\":\"ok\",\"msg\":\"\u5df2\u89e3\u9664\u7528\u6237 '%s' \u7684\u7981\u8a00\"}",
+                 target);
+    }
+
+    chat_send_message(task->fd, MSG_BAN_RESP,
+                      (const uint8_t *)resp, strlen(resp));
+
+    LOG_INFO("Admin '%s' %s user '%s'", cli->username, do_ban ? "banned" : "unbanned", target);
+}
+
 /* 聊天服务主入口: 根据消息类型分发到各处理函数 */
 void chat_service_process(void *arg)
 {
@@ -641,6 +750,9 @@ void chat_service_process(void *arg)
         break;
     case MSG_KICK_REQ:
         handle_kick(task);
+        break;
+    case MSG_BAN_REQ:
+        handle_ban(task);
         break;
     default:
         LOG_WARN("Unknown message type: 0x%02X from fd=%d",

@@ -205,3 +205,10 @@ void client_update_active(client_t *cli)
     if (!cli) return;
     cli->last_active = time(NULL);
 }
+
+/* 设置客户端禁言状态 */
+void client_set_banned(client_t *cli, int banned)
+{
+    if (!cli) return;
+    cli->is_banned = banned;
+}

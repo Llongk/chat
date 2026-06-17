@@ -12,6 +12,7 @@ typedef struct client {
     char               username[MAX_USERNAME_LEN]; /* 用户名 */
     int                logged_in;       /* 是否已登录 */
     int                is_admin;        /* 是否为管理员 */
+    int                is_banned;       /* 是否被禁言 (1=禁言,0=正常) */
     time_t             last_active;     /* 最后活跃时间 */
     ringbuf_t         *inbuf;           /* 接收环形缓冲区 */
     ringbuf_t         *outbuf;          /* 发送环形缓冲区 */
@@ -62,5 +63,8 @@ void client_set_logged_out(client_t *cli);
 
 /* 更新客户端活跃时间 */
 void client_update_active(client_t *cli);
+
+/* 设置客户端禁言状态 (banned: 1=禁言, 0=正常) */
+void client_set_banned(client_t *cli, int banned);
 
 #endif /* CLIENT_H */
